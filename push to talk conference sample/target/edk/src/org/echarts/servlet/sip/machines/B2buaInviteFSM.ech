@@ -1,0 +1,331 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import javax.servlet.*;
+import java.util.Properties;
+import javax.servlet.ServletContext;
+
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** This is a fragment for acting as a B2BUA to relay an initial INVITE
+ *  request.<p>
+
+ *  This machine reaches terminal state when the SIP dialog is confirmed
+ *  (i.e. INVITE-200 OK-ACK), or when the INVITE transaction is terminated
+ *  with a non-2xx final response.<p>
+ *
+ * Similar to the RI/TCK sample B2BUA application (version 1.0.9),
+ * there are two protocol level race conditions:<p>
+ * 1) CANCEL to callee and 200 OK to INVITE from callee crossed:
+ *      (RFC3261 sec 15)
+ *      Because the container has already sent 487 to caller, the application should
+ *      send ACK then BYE to callee to terminate the callee side.<p>
+ * 2) CANCEL from caller and 200 OK to INVITE to caller crossed:
+ *      (JSR116 sec 7.2.3)
+ *      In the case where container receives CANCEL before application tries to send
+ *      200 OK to INVITE to caller side, the send() will throw IllegalStateException.
+ *      This exception should be caught, and the application sends ACK then BYE
+ *      to callee side to terminate the callee side dialog.<p>
+ *
+ * Case (1) is handled by this machine.  Case (2) is not currently handled.
+ */
+
+public machine B2buaInviteFSM  {
+<*
+	final static String rcsid = "$Name:  $ $Id: B2buaInviteFSM.ech,v 1.8 2008/08/21 22:00:34 cheung Exp $";
+
+	FeatureBox        box;
+	SipPort    caller;
+	SipPort    callee;
+	RequestModifier   reqModifier;
+
+	BoxPort    boxPort;
+
+	private InternalPort intPort;
+
+	public static final String PENDING_REQUEST  = "B2buaInviteFSM.PENDING_REQUEST";
+	public static final String PENDING_PRACK_REQUEST  = "B2buaInviteFSM.PENDING_PRACK_REQUEST";
+	private final static String SUCCESS_RESPONSE = "B2buaInviteFSM.SUCCESS_RESPONSE";
+	private final static String FAILURE_RESPONSE = "B2buaInviteFSM.FAILURE_RESPONSE";
+	private final static String RELIABLE_PROVISIONAL_RESPONSE = "B2buaInviteFSM.RELIABLE_PROVISIONAL_RESPONSE";
+	final static String RECEIVED_BYE = "B2buaInviteFSM.RECEIVED_BYE";
+
+	final static int MAX_OUTSTANDING_PRACK_REQUESTS = 8;
+ 
+	ReliableProvisionalResponse reliableResponse;
+
+	int numOutstandingPrackRequests = 0;
+
+	/**
+	 *	Store an outgoing request that is pending a response.
+	 *	@param req The request to store. If null, clear the storage.
+	 */
+	private void setPendingRequest(SipServletRequest req) {
+		if (req != null) {
+			callee.setAttribute(PENDING_REQUEST, req);
+		} else {
+			callee.removeAttribute(PENDING_REQUEST);
+		}
+	}
+
+	/**
+	 *	Retrieve a previously stored outgoing request that is pending a response.  May be null.
+	 */
+	private SipServletRequest getPendingRequest() {
+		return (SipServletRequest) callee.getAttribute(PENDING_REQUEST);
+	}
+
+	private void setSuccessResponse(SuccessResponse r) {
+		callee.setAttribute(SUCCESS_RESPONSE, r);
+	}
+
+	/**
+	 *	Get received success response to outgoing INVITE request.  May be null.
+	 */
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) callee.getAttribute(SUCCESS_RESPONSE);
+	}
+
+	private void setFailureResponse(FinalResponse r) {
+		callee.setAttribute(FAILURE_RESPONSE, r);
+	}
+
+	/**
+	 *	Get received failure response to outgoing INVITE request.  May be null.
+	 */
+	public FinalResponse getFailureResponse() {
+		return (FinalResponse) callee.getAttribute(FAILURE_RESPONSE);
+	}
+
+	private void setReceivedBye(Bye b) {
+		callee.setAttribute(RECEIVED_BYE, b);
+	}
+
+	public Bye getReceivedBye() {
+		return (Bye) callee.getAttribute(RECEIVED_BYE);
+	}
+
+*>
+
+	/** Used when this FSM is invoked by a parent FSM.
+	*/
+	public B2buaInviteFSM(FeatureBox box, SipPort caller, SipPort callee, RequestModifier reqModifier) {
+		this.box    = box;
+		this.caller = caller;
+		this.callee = callee;
+		this.intPort = new InternalPort(this, "intPort");
+
+		this.reqModifier = reqModifier;
+
+		boxPort = box.getBoxPort();
+	}
+
+    /** Tracks whether or not a provisional response (unreliable or reliable) has been received
+     *  and propagated. Since reliable provisional responses require quite a bit of extra work, 
+     *  it's a lot easier to let this machine handle them rather than define an override in a parent.
+     */
+    public concurrent state PROVISIONAL_RECEIVED : {
+        public initial state NO;
+        public state YES;
+    }
+
+	initial state INIT;
+
+	// Public states
+	public state MONITOR_CALLEE;
+	public state SEND_INVITE;
+
+	// Private states
+	private state RECV_PROVISIONAL_RESPONSE;
+
+	// A parent FSM can define transitions based on SUCCESS and FAILURE
+	// states, and can get access to successResponse or failureResponse
+	// if desired (since they are public).
+	//
+	public nonterminal state FAILURE;
+	public nonterminal state SUCCESS;
+	public nonterminal state CANCELLED;
+	public nonterminal state CALLEE_BYED;
+
+	state AWAIT_CALLER_ACK;
+	state CALLER_CANCELLED;
+	state CANCELLED_AWAIT_CALLEE_BYE_RESPONSE;
+	state AWAIT_CALLER_BYE_RESPONSE;
+	state AWAIT_PRACK;
+	state AWAIT_PRACK_RESPONSE;
+
+	transition INIT - boxPort?Invite / caller.bind(message) -> SEND_INVITE;
+
+	transition SEND_INVITE - / {
+		<*
+		SipServletRequest inviteReq = callee.createInvite(caller.getInitialRequest(), reqModifier);
+		setPendingRequest(inviteReq);
+		*>
+		callee!inviteReq;
+	} -> MONITOR_CALLEE;
+
+	/**
+	* Dispatch the message to Internal port so machines embedding B2buaInviteFSM can override
+	* transitions for Provisional Responses
+	*/
+	transition MONITOR_CALLEE - callee ? ProvisionalResponse / {
+		intPort ! message;
+	} -> [ RECV_PROVISIONAL_RESPONSE, PROVISIONAL_RECEIVED.YES ];
+
+	transition RECV_PROVISIONAL_RESPONSE - intPort ? UnreliableProvisionalResponse
+			[ SipServletUtils.compareSipServletRequests(callee.getInitialRequest(), message.getRequest()) ] /
+		caller!caller.createResponse(message, caller.getInitialRequest());
+	-> MONITOR_CALLEE;
+
+	public concurrent state PRACK_HANDLER[MAX_OUTSTANDING_PRACK_REQUESTS]: HandlePrackFSM(reliableResponse,caller, callee);
+
+	transition RECV_PROVISIONAL_RESPONSE - intPort ? ReliableProvisionalResponse
+			[ numOutstandingPrackRequests < MAX_OUTSTANDING_PRACK_REQUESTS ] / {
+		reliableResponse = message;
+		++numOutstandingPrackRequests;
+		caller!caller.createResponse(message, caller.getInitialRequest());
+	} -> [ MONITOR_CALLEE, PRACK_HANDLER.NEW ]
+	else / {
+		putEvent(new WarnEvent(String.format("Rejected reliable provisional response on port %s because maximum number of responses were outstanding", callee.toString())));
+	} -> [ MONITOR_CALLEE, PRACK_HANDLER.DEEP_HISTORY ];
+
+	<* int index = -1; *>
+
+	transition PRACK_HANDLER[?index].TERMINAL - / {
+		PRACK_HANDLER.get(index).cleanup();
+		--numOutstandingPrackRequests;
+	} -> PRACK_HANDLER.DEEP_HISTORY;
+	
+	// once we receive a Cancel, don't do anything else on caller port
+	//
+	transition MONITOR_CALLEE - caller?Cancel / {
+		//
+		// Will not get a response to this cancel from callee (JSR116 7.1.7),
+		//   but should get a response (487).
+		// A race condition may also occur where the callee sent 200 OK in the
+		//  meantime.  We should send a ACK, then BYE.
+		//
+		<*
+		SipServletRequest cancelReq = callee.getInitialRequest().createCancel();
+		callee.copyRequestHeaders(message, cancelReq);
+		*>
+		callee!cancelReq;
+	} -> [ CALLER_CANCELLED, PRACK_HANDLER.DISCONNECTED];
+
+	// Absorb provisional responses in this state
+	transition CALLER_CANCELLED - callee?UnreliableProvisionalResponse
+			[ SipServletUtils.compareSipServletRequests(callee.getInitialRequest(), message.getRequest()) ]
+	-> CALLER_CANCELLED;
+
+	// 487 Reqiest Terminated response
+	transition CALLER_CANCELLED - callee?ErrorResponse487
+			[ SipServletUtils.compareSipServletRequests(getPendingRequest(), message.getRequest()) ] / {
+		setPendingRequest(null);
+	} -> CANCELLED;
+
+	// Final non-2xx responses - we are done
+	transition CALLER_CANCELLED - callee?ErrorResponse
+			[ SipServletUtils.compareSipServletRequests(getPendingRequest(), message.getRequest()) ] / {
+		setPendingRequest(null);
+	} -> FAILURE;
+
+	// 2xx responses - need to send BYE
+	transition CALLER_CANCELLED - callee?SuccessResponse
+			[ SipServletUtils.compareSipServletRequests(getPendingRequest(), message.getRequest()) ] / {
+		callee!message.createAck();
+		<*
+			SipServletRequest byeReq = callee.createRequest("BYE");
+			setPendingRequest(byeReq);
+		*>
+		callee ! byeReq;
+	}
+	-> CANCELLED_AWAIT_CALLEE_BYE_RESPONSE;
+
+	transition CANCELLED_AWAIT_CALLEE_BYE_RESPONSE - callee?ByeResponse
+			[ SipServletUtils.compareSipServletRequests(getPendingRequest(),message.getRequest()) ] / {
+		setPendingRequest(null);
+	} -> CANCELLED;
+
+	transition MONITOR_CALLEE - callee?SuccessResponse
+			[ SipServletUtils.compareSipServletRequests(callee.getInitialRequest(), message.getRequest()) ] / {
+		setPendingRequest(null);
+		setSuccessResponse(message);
+
+		// send SuccessResponse to caller with same SDP as received response
+		//
+		caller!caller.createResponse(message, caller.getInitialRequest());
+
+		//
+		// TODO : Note that a race condition may occur where the container received
+		// CANCEL from caller in the meantime.  See JSR116 7.2.3.
+		// In this case, this will cause an uncaught IllegalStateException.
+		//
+	} -> AWAIT_CALLER_ACK;
+	
+	// end-to-end Ack
+	//
+	transition AWAIT_CALLER_ACK - caller?Ack / {
+		<*
+		SipServletRequest ackReq = getSuccessResponse().createAck();
+		callee.copyRequestHeaders(message, ackReq);
+		if (message.getContentLength() > 0) {
+			ackReq.setContent(message.getContent(), message.getContentType());
+		}
+		*>
+		callee!ackReq;
+	} -> SUCCESS;
+
+	// callee BYE received before caller ACK --- respond and propagate to caller
+	// Handle this at this level since we are not in a transparent state.
+	//
+	transition AWAIT_CALLER_ACK - callee?Bye / {
+		setReceivedBye(message);
+		callee!callee.createResponse(200, message);
+		caller!caller.createRequest("BYE");
+	} -> AWAIT_CALLER_BYE_RESPONSE;
+
+	// Error calling callee.
+	// Propagate failure response to caller.  Application will not get an ACK,
+	// so we are done.
+	//
+	transition MONITOR_CALLEE - callee?ErrorResponse
+			[ SipServletUtils.compareSipServletRequests(callee.getInitialRequest(), message.getRequest()) ] / {
+		setFailureResponse(message);
+		caller!caller.createResponse(message, caller.getInitialRequest());
+	} -> FAILURE;
+	
+	// Redirect not supported.
+	// Propagate failure response to caller.  Application will not get an ACK,
+	// so we are done.
+	//
+	transition MONITOR_CALLEE - callee?RedirectResponse / {
+		setFailureResponse(message);
+		caller!caller.createResponse(getFailureResponse().getStatus(), caller.getInitialRequest());
+	} -> FAILURE;
+
+
+	transition AWAIT_CALLER_BYE_RESPONSE - caller?Response -> CALLEE_BYED;
+
+	// Ignore any requests from caller (e.g., an ACK race).
+	// Since we are processing messages from caller in this state (see
+	// transition above), we need to be prepared for any messages
+	// we may receive in order to prevent a MachineException.
+	//
+	transition AWAIT_CALLER_BYE_RESPONSE - caller?Request -> AWAIT_CALLER_BYE_RESPONSE;
+
+    /** If a provisional response is received *after* the INVITE transaction is complete,
+     *  just ignore it.  It's too late to do anything with it.
+     */
+    transition SUCCESS - callee ? UnreliableProvisionalResponse -> DEEP_HISTORY;
+}

@@ -1,0 +1,125 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2007 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: FeatureBoxTerminationHandlerFSM.ech 1698 2010-11-18 14:29:38Z yotommy $;
+
+package org.echarts.servlet.sip;
+
+import java.util.Iterator;
+import javax.servlet.sip.SipServletRequest;
+import javax.servlet.sip.SipServletResponse;
+import javax.servlet.sip.SipServletMessage;
+
+import org.echarts.monitor.*;
+import org.echarts.servlet.sip.messages.MidDialogTerminationResponse;
+
+/** Tear down all ports for the given box when any of these
+ *    conditions occur:
+ *
+ * 1. Underlying FSM reaches terminal state
+ * 2. Bye received, not handled by underlying FSM
+ * 3. Cancel received, not handled by underlying FSM
+ * 4. 408/481 received to non-initial request, not handled by underlying FSM
+ */
+
+machine FeatureBoxTerminationHandlerFSM implements BoxMachine {
+<*
+	final FeatureBox box;
+
+	Iterator<SipPort> sipPortIterator;
+	SipPort currentSipPort;
+	int numSipPorts = 0;
+	int terminated = 0;
+*>
+	public FeatureBoxTerminationHandlerFSM(FeatureBox box) {
+		this.box = box;
+	}
+
+	/**
+	   For BoxMachine interface.
+	*/
+<*
+	public final FeatureBox getBox() {
+		return box;
+	}
+*>
+	 /**
+		Returns application submachine nested in RUN_APPLICATION
+		state.
+	  */
+<*
+	 TransitionMachine getApplicationMachine() {
+		return (TransitionMachine) RUN_APPLICATION;
+	 }
+*>	 
+	/** Run the specified machine.  All application
+	 *  logic happens in this state.
+	 */
+	initial state RUN_APPLICATION
+		: reflect( box.getServlet().getMachineClassName(), box.getServlet().getMachineArguments(box));
+
+	state GET_PORTS entry {
+		sipPortIterator = box.getSipPorts(); 
+	}
+
+	/** Teardown and destroy all sip ports in box
+	 * concurrently.
+	 */
+	state TERMINATE[FeatureBox.MAX_PORTS]: SipPortTeardownFSM(currentSipPort, true);
+
+	/** True end of execution.
+	 */
+	state END;
+
+	/** If application machine reaches terminal state, then
+	 *  start auto-teardown.
+	 */
+	transition RUN_APPLICATION.TERMINAL --> GET_PORTS;
+	
+	/** If BYE is received, but not handled by application machine, 
+	 *  then start auto-teardown.
+	 */
+	transition RUN_APPLICATION - *?SipServletMessage
+		[ <* message instanceof SipServletRequest && message.getMethod().equals("BYE") *> ] -> GET_PORTS;
+
+	/** If CANCEL is received, but not handled by application machine, 
+	 *  then start auto-teardown.
+	 */
+	transition RUN_APPLICATION - *?SipServletMessage
+		[ <* message instanceof SipServletRequest && message.getMethod().equals("CANCEL") *> ] -> GET_PORTS;
+
+	/** If mid-dialog 408/481 is received, but not handled by application machine, 
+	 *  then start auto-teardown.
+	 */
+	transition RUN_APPLICATION - *?SipServletMessage 
+		[ <* message instanceof MidDialogTerminationResponse && !((SipServletResponse) message).getRequest().isInitial() *> ]
+	-> GET_PORTS;
+
+	transition GET_PORTS - /
+		// release this box from the containing appsession, so
+		// that new initial requests go to new box instance
+		// (applies to bound box case only)
+		//
+		box.release();
+	-> TERMINATE;
+
+	/** Teardown and destroy box's ports.
+	 */
+	transition TERMINATE - [ sipPortIterator.hasNext() ] / {
+		currentSipPort = sipPortIterator.next();
+		++numSipPorts;
+	} -> TERMINATE.NEW;
+		
+	transition TERMINATE.TERMINAL - / terminated++ -> TERMINATE.DEEP_HISTORY;
+
+	/** All port termination machines are complete, so finish up.
+    */
+	transition TERMINATE - [ !sipPortIterator.hasNext() && terminated == numSipPorts ] -> END;
+}

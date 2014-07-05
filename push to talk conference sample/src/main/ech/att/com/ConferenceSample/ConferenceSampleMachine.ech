@@ -1,0 +1,85 @@
+/**************************************************************
+ *       Template machine for ECharts for SIP Servlets        *
+ **************************************************************/
+
+// $Name:  $ $Id: $
+
+package att.com.ConferenceSample;
+
+import java.util.Properties;
+import javax.servlet.ServletContext;
+import javax.servlet.sip.*;
+import javax.servlet.sip.ar.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import att.com.ConferenceSample.*;
+import org.echarts.*;
+import messages.sipToJavaNotification;
+
+/**
+ * Represents Invite Handler that creates a Conference FSM and route each Invite to it.
+ * Since it's a bounded box, it allows one instance.
+ */
+public machine ConferenceSampleMachine implements ConferenceSampleControl, BoundBoxMachine {
+<*
+	FeatureBox     box;
+	Properties     servletProps;
+	ServletContext servletContext;
+	BoxPort boxPort;
+	/** Initated only if a new invite was recieved from the user**/
+	SipPort caller;
+	
+	private SipServletRequest initialInvite = null;
+	
+	private InternalPort externalPortServer = null;
+	
+	private String conferenceName = null;
+							  
+	sipToJavaNotification sipToJaveNotify;
+*>
+
+	public ConferenceSampleMachine(FeatureBox box, Properties servletProps, ServletContext servletContext) { <*
+		this.box            = box;
+		this.servletProps   = servletProps;
+		this.servletContext = servletContext;
+
+		boxPort = box.getBoxPort();
+
+		// To use the EChartsMachineToJava mechanism, create a class named
+		// ConferenceSampleMachineToJavaImpl that implements ConferenceSampleMachineToJava
+		// and uncomment the line below.  You can use a different class name
+		// by specifying the sipToJavaClassName init-param in sip.xml.
+		//
+		
+		// TODO use the sessionKey as conference name, (we already extract it in sipServlet)
+		
+
+	*> }
+
+	initial state INIT;
+	
+	state CREATE_CONFERENCE : ConferenceFSM(box,servletProps,servletContext, externalPortServer, initialInvite, sipToJaveNotify);
+	
+	transition INIT - boxPort ? Invite [externalPortServer == null]/ {
+		// Create a Conference Machine
+		<* 				
+		initialInvite = message;		
+		externalPortServer = new InternalPort(this,"server");
+		conferenceName = EChartsSipServlet.sipApplicationKey(message);
+		ConferenceSampleMachineToJava toJava = EChartsMachineToJava.getInstance(box.getApplicationSession());
+		sipToJaveNotify = new sipToJavaNotification(conferenceName, toJava);
+		*>		
+		putEvent(new DebugEvent("ConferenceSampleMachine Got Invite" + message));
+	} -> CREATE_CONFERENCE;
+	
+	
+	transition CREATE_CONFERENCE - boxPort ? Invite [externalPortServer != null]/ {
+		putEvent(new DebugEvent("THE PEER is " + message));
+		externalPortServer.output(message, this);		
+	} -> DEEP_HISTORY;
+	/** terminal state
+	 */
+	state END;
+}
+

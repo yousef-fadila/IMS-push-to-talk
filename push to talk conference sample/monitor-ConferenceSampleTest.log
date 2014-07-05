@@ -1,0 +1,3607 @@
+time: 2012.03.26 17:34:12:444 IST (1332776052444)
+event: AppSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_1
+EVENT_TYPE: CREATED
+############################################################
+time: 2012.03.26 17:34:12:444 IST (1332776052444)
+event: SipSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_1
+EVENT_TYPE: CREATED
+SIP_SESSION_ID: local.1332772715413_1_0_1
+############################################################
+time: 2012.03.26 17:34:12:492 IST (1332776052492)
+event: FeatureBoxCreatedEvent
+root: 1862c225:1364f71ba53:-7fe4
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:494 IST (1332776052494)
+event: SipInputEvent
+root: 1862c225:1364f71ba53:-7fe4
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+MESSAGE_TYPE: SIP Request
+PORT_ID: 1862c225:1364f71ba53:-7fe3
+PORT_NAME: BoxPort
+PORT_TYPE: EXTERNAL_PORT
+REMOTE_ADDR: 10.10.5.32
+REMOTE_PORT: 33333
+REQUEST_URI: sip:conf@10.10.5.32:5060
+SIP_METHOD: INVITE
+SIP_SESSION_ID: local.1332772715413_1_0_1
+
+Equivalent SIP message:
+INVITE sip:conf@10.10.5.32:5060 SIP/2.0
+Contact: sip:alice@10.10.5.32:33333
+User-Agent: testCompletedCall.alice Mon Mar 26 17:34:11 IST 2012
+Allow: INVITE
+Allow: BYE
+Allow: CANCEL
+Allow: ACK
+Allow: PRACK
+Allow: INFO
+Allow: REFER
+Allow: NOTIFY
+Allow: OPTIONS
+Allow: SUBSCRIBE
+Call-ID: 082d0b88eaf8136ccffb49de8c01af3c@10.10.5.32
+From: alice <sip:alice@10.10.5.32:33333>;tag=aliceSipPort11332776051737
+Via: SIP/2.0/UDP 10.10.5.32:33333;branch=z9hG4bK-323232-943ab7176fbe8f286899d632992b9571
+Content-Type: application/sdp
+Max-Forwards: 70
+Content-Length: 174
+To: sip:conf@10.10.5.32:5060
+CSeq: 1 INVITE
+
+v=0
+o=user1 9 2 IN IP4 10.10.5.32
+s=media session
+c=IN IP4 10.10.5.32
+t=0 0
+m=audio 63034 RTP/AVP 0 101
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=sendrecv
+############################################################
+time: 2012.03.26 17:34:12:523 IST (1332776052523)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New conference
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:525 IST (1332776052525)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New Caller
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:567 IST (1332776052567)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+message: init 1 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:569 IST (1332776052569)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[0]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:572 IST (1332776052572)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:574 IST (1332776052574)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+message: 1:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:576 IST (1332776052576)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:577 IST (1332776052577)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:578 IST (1332776052578)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+message: init 2 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:580 IST (1332776052580)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[1]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:581 IST (1332776052581)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:582 IST (1332776052582)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+message: 2:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:584 IST (1332776052584)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fd1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:585 IST (1332776052585)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:586 IST (1332776052586)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fcb
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+message: init 3 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:588 IST (1332776052588)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[2]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:589 IST (1332776052589)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fcb
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:590 IST (1332776052590)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fcb
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+message: 3:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:592 IST (1332776052592)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fcb
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:593 IST (1332776052593)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:594 IST (1332776052594)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fc5
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+message: init 4 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:595 IST (1332776052595)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[3]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:597 IST (1332776052597)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fc5
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:598 IST (1332776052598)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fc5
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+message: 4:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:600 IST (1332776052600)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fc5
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:601 IST (1332776052601)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:602 IST (1332776052602)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fbf
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+message: init 5 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:603 IST (1332776052603)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[4]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:605 IST (1332776052605)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fbf
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:606 IST (1332776052606)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fbf
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+message: 5:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:607 IST (1332776052607)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fbf
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:609 IST (1332776052609)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:610 IST (1332776052610)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb9
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+message: init 6 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:611 IST (1332776052611)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[5]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:612 IST (1332776052612)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb9
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:614 IST (1332776052614)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb9
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+message: 6:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:615 IST (1332776052615)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb9
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:616 IST (1332776052616)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:618 IST (1332776052618)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb3
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+message: init 7 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:619 IST (1332776052619)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[6]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:620 IST (1332776052620)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb3
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:622 IST (1332776052622)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb3
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+message: 7:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:623 IST (1332776052623)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fb3
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:625 IST (1332776052625)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:626 IST (1332776052626)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fad
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+message: init 8 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:627 IST (1332776052627)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[7]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:629 IST (1332776052629)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fad
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:630 IST (1332776052630)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fad
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+message: 8:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:631 IST (1332776052631)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fad
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:632 IST (1332776052632)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:634 IST (1332776052634)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+message: init 9 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:635 IST (1332776052635)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[8]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:636 IST (1332776052636)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:638 IST (1332776052638)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+message: 9:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:639 IST (1332776052639)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa7
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:641 IST (1332776052641)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:642 IST (1332776052642)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+message: init 10 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:643 IST (1332776052643)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[9]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:644 IST (1332776052644)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:646 IST (1332776052646)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+message: 10:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:647 IST (1332776052647)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fa1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:648 IST (1332776052648)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:649 IST (1332776052649)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f9b
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+message: init 11 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:651 IST (1332776052651)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[10]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:652 IST (1332776052652)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f9b
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:653 IST (1332776052653)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f9b
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+message: 11:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:654 IST (1332776052654)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f9b
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:656 IST (1332776052656)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:657 IST (1332776052657)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f95
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+message: init 12 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:658 IST (1332776052658)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[11]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:659 IST (1332776052659)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f95
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:661 IST (1332776052661)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f95
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+message: 12:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:662 IST (1332776052662)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f95
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:663 IST (1332776052663)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:665 IST (1332776052665)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f8f
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+message: init 13 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:666 IST (1332776052666)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[12]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:667 IST (1332776052667)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f8f
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:668 IST (1332776052668)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f8f
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+message: 13:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:670 IST (1332776052670)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f8f
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:671 IST (1332776052671)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:672 IST (1332776052672)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f89
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+message: init 14 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:674 IST (1332776052674)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[13]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:675 IST (1332776052675)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f89
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:676 IST (1332776052676)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f89
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+message: 14:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:677 IST (1332776052677)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f89
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:679 IST (1332776052679)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:680 IST (1332776052680)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f83
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+message: init 15 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:681 IST (1332776052681)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[14]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:682 IST (1332776052682)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f83
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:684 IST (1332776052684)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f83
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+message: 15:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:685 IST (1332776052685)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f83
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:686 IST (1332776052686)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:687 IST (1332776052687)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f7d
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+message: init 16 machine
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:689 IST (1332776052689)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[15]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:690 IST (1332776052690)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f7d
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:691 IST (1332776052691)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f7d
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+message: 16:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:692 IST (1332776052692)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7f7d
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:694 IST (1332776052694)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7fe4
+machine: 1862c225:1364f71ba53:-7fe1
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:34:12:695 IST (1332776052695)
+event: FeatureBoxExceptionEvent
+root: 1862c225:1364f71ba53:-7fe4
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+E4SS_STACK_TRACE: org.echarts.DynamicMachineException: Attempt to create more than 16 machine pool instances
+	at org.echarts.DynamicMachine.getNextFreeIndex(DynamicMachine.java:1182)
+	at org.echarts.DynamicMachine.machineInstanceSatisfiesTarget(DynamicMachine.java:1045)
+	at org.echarts.TransitionMachine.machineInstanceSatisfiesTarget(TransitionMachine.java:931)
+	at org.echarts.TransitionMachine.fireMessagelessTransition(TransitionMachine.java:1319)
+	at org.echarts.TransitionMachine.runMessagelessTransitionSequence(TransitionMachine.java:1270)
+	at org.echarts.TransitionMachine.initializeRoot(TransitionMachine.java:1235)
+	at org.echarts.TransitionMachine.run(TransitionMachine.java:1112)
+	at org.echarts.servlet.sip.FeatureBox.advanceBoxMachine(FeatureBox.java:222)
+	at org.echarts.servlet.sip.BoxPort.input(BoxPort.java:44)
+	at org.echarts.servlet.sip.EChartsSipServlet.dispatchToFreeBox(EChartsSipServlet.java:547)
+	at org.echarts.servlet.sip.EChartsSipServlet.doRequest(EChartsSipServlet.java:485)
+	at javax.servlet.sip.SipServlet.doRequestWrapper(SipServlet.java:544)
+	at javax.servlet.sip.SipServlet.service(SipServlet.java:893)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.service(ServletWrapper.java:1657)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.service(ServletWrapper.java:1597)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain.doFilter(WebAppFilterChain.java:131)
+	at com.ibm.ws.sip.container.was.SipFilter.doFilter(SipFilter.java:116)
+	at com.ibm.ws.webcontainer.filter.FilterInstanceWrapper.doFilter(FilterInstanceWrapper.java:188)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain.doFilter(WebAppFilterChain.java:116)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain._doFilter(WebAppFilterChain.java:77)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterManager.doFilter(WebAppFilterManager.java:908)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.handleRequest(ServletWrapper.java:934)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.handleRequest(ServletWrapper.java:502)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapperImpl.handleRequest(ServletWrapperImpl.java:179)
+	at com.ibm.ws.webcontainer.servlet.CacheServletWrapper.handleRequest(CacheServletWrapper.java:91)
+	at com.ibm.ws.webcontainer.WebContainer.handleRequest(WebContainer.java:864)
+	at com.ibm.ws.webcontainer.WSWebContainer.handleRequest(WSWebContainer.java:1583)
+	at com.ibm.wsspi.webcontainer.WebContainer.handleRequest(WebContainer.java:95)
+	at com.ibm.ws.sip.container.was.SipMessage.dispatch(SipMessage.java:1384)
+	at com.ibm.ws.sip.container.was.SipMessage.run(SipMessage.java:1355)
+	at com.ibm.ws.sip.container.was.WebsphereInvoker.invokeSipServlet(WebsphereInvoker.java:140)
+	at com.ibm.ws.sip.container.router.SipRouter.invokeSipServlet(SipRouter.java:1483)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.handleUASRequest(TransactionUserImpl.java:1391)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.processRequestUASMode(TransactionUserImpl.java:1483)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.processRequest(TransactionUserImpl.java:1259)
+	at com.ibm.ws.sip.container.tu.TransactionUserWrapper.processRequest(TransactionUserWrapper.java:571)
+	at com.ibm.ws.sip.container.transaction.ServerTransaction.processRequest(ServerTransaction.java:103)
+	at com.ibm.ws.sip.container.router.tasks.RequestRoutedTask.doTask(RequestRoutedTask.java:99)
+	at com.ibm.ws.sip.container.router.tasks.InitialRequestRoutedTask.doTask(InitialRequestRoutedTask.java:63)
+	at com.ibm.ws.sip.container.router.tasks.RoutedTask.run(RoutedTask.java:84)
+	at com.ibm.ws.sip.container.was.SignalingEndOfTask.run(SignalingEndOfTask.java:75)
+	at com.ibm.ws.util.ThreadPool$Worker.run(ThreadPool.java:1604)
+
+FINAL_MACHINE_STATE: :org.echarts.servlet.sip.FeatureBoxTerminationHandlerFSM{ RUN_APPLICATION:att.com.ConferenceSample.ConferenceSampleMachine{ INIT  PARALLEL[0]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[1]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[2]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[3]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[4]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[5]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[6]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[7]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[8]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[9]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[10]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[11]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[12]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[13]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[14]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[15]:att.com.ConferenceSample.OutLegFSM{ END } } }
+############################################################
+time: 2012.03.26 17:34:12:698 IST (1332776052698)
+event: AppSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_1
+EVENT_TYPE: DESTROYED
+############################################################
+time: 2012.03.26 17:34:12:700 IST (1332776052700)
+event: SipSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_1
+EVENT_TYPE: DESTROYED
+SIP_SESSION_ID: local.1332772715413_1_0_1
+############################################################
+time: 2012.03.26 17:34:12:701 IST (1332776052701)
+event: FeatureBoxDestroyedEvent
+root: 1862c225:1364f71ba53:-7fe4
+APP_SESSION_ID: local.1332772715413_1
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7fe2
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:163 IST (1332776567163)
+event: AppSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_2
+EVENT_TYPE: CREATED
+############################################################
+time: 2012.03.26 17:42:47:163 IST (1332776567163)
+event: SipSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_2
+EVENT_TYPE: CREATED
+SIP_SESSION_ID: local.1332772715413_2_1_1
+############################################################
+time: 2012.03.26 17:42:47:208 IST (1332776567208)
+event: FeatureBoxCreatedEvent
+root: 1862c225:1364f71ba53:-7f77
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:210 IST (1332776567210)
+event: SipInputEvent
+root: 1862c225:1364f71ba53:-7f77
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+MESSAGE_TYPE: SIP Request
+PORT_ID: 1862c225:1364f71ba53:-7f76
+PORT_NAME: BoxPort
+PORT_TYPE: EXTERNAL_PORT
+REMOTE_ADDR: 10.10.5.32
+REMOTE_PORT: 33333
+REQUEST_URI: sip:conf@10.10.5.32:5060
+SIP_METHOD: INVITE
+SIP_SESSION_ID: local.1332772715413_2_1_1
+
+Equivalent SIP message:
+INVITE sip:conf@10.10.5.32:5060 SIP/2.0
+Contact: sip:alice@10.10.5.32:33333
+User-Agent: testCompletedCall.alice Mon Mar 26 17:42:46 IST 2012
+Allow: INVITE
+Allow: BYE
+Allow: CANCEL
+Allow: ACK
+Allow: PRACK
+Allow: INFO
+Allow: REFER
+Allow: NOTIFY
+Allow: OPTIONS
+Allow: SUBSCRIBE
+Call-ID: e5fcfc9dbe8734567a27943316635c6b@10.10.5.32
+From: alice <sip:alice@10.10.5.32:33333>;tag=aliceSipPort11332776566996
+Via: SIP/2.0/UDP 10.10.5.32:33333;branch=z9hG4bK-373330-58ed164123ea22d50558808ac7a1e13d
+Content-Type: application/sdp
+Max-Forwards: 70
+Content-Length: 174
+To: sip:conf@10.10.5.32:5060
+CSeq: 1 INVITE
+
+v=0
+o=user1 9 2 IN IP4 10.10.5.32
+s=media session
+c=IN IP4 10.10.5.32
+t=0 0
+m=audio 54872 RTP/AVP 0 101
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=sendrecv
+############################################################
+time: 2012.03.26 17:42:47:238 IST (1332776567238)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New conference
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:240 IST (1332776567240)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New Caller
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:274 IST (1332776567274)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f6a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+message: init 1 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:276 IST (1332776567276)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[0]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:280 IST (1332776567280)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f6a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:282 IST (1332776567282)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f6a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+message: 1:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:284 IST (1332776567284)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f6a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[0]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:286 IST (1332776567286)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:287 IST (1332776567287)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f64
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+message: init 2 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:288 IST (1332776567288)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[1]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:289 IST (1332776567289)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f64
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:291 IST (1332776567291)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f64
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+message: 2:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:292 IST (1332776567292)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f64
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[1]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:294 IST (1332776567294)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:295 IST (1332776567295)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f5e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+message: init 3 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:296 IST (1332776567296)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[2]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:298 IST (1332776567298)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f5e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:299 IST (1332776567299)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f5e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+message: 3:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:301 IST (1332776567301)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f5e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[2]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:302 IST (1332776567302)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:303 IST (1332776567303)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f58
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+message: init 4 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:304 IST (1332776567304)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[3]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:306 IST (1332776567306)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f58
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:307 IST (1332776567307)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f58
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+message: 4:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:308 IST (1332776567308)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f58
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[3]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:310 IST (1332776567310)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:311 IST (1332776567311)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f52
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+message: init 5 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:312 IST (1332776567312)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[4]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:314 IST (1332776567314)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f52
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:316 IST (1332776567316)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f52
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+message: 5:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:317 IST (1332776567317)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f52
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[4]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:319 IST (1332776567319)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:321 IST (1332776567321)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f4c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+message: init 6 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:322 IST (1332776567322)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[5]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:324 IST (1332776567324)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f4c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:326 IST (1332776567326)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f4c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+message: 6:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:327 IST (1332776567327)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f4c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[5]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:328 IST (1332776567328)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:329 IST (1332776567329)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f46
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+message: init 7 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:331 IST (1332776567331)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[6]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:332 IST (1332776567332)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f46
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:333 IST (1332776567333)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f46
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+message: 7:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:335 IST (1332776567335)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f46
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[6]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:336 IST (1332776567336)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:337 IST (1332776567337)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f40
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+message: init 8 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:339 IST (1332776567339)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[7]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:340 IST (1332776567340)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f40
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:342 IST (1332776567342)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f40
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+message: 8:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:343 IST (1332776567343)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f40
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[7]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:344 IST (1332776567344)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:345 IST (1332776567345)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f3a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+message: init 9 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:346 IST (1332776567346)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[8]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:348 IST (1332776567348)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f3a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:349 IST (1332776567349)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f3a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+message: 9:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:350 IST (1332776567350)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f3a
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[8]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:352 IST (1332776567352)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:353 IST (1332776567353)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f34
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+message: init 10 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:355 IST (1332776567355)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[9]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:356 IST (1332776567356)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f34
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:358 IST (1332776567358)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f34
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+message: 10:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:359 IST (1332776567359)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f34
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[9]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:360 IST (1332776567360)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:362 IST (1332776567362)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f2e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+message: init 11 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:363 IST (1332776567363)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[10]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:365 IST (1332776567365)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f2e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:366 IST (1332776567366)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f2e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+message: 11:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:367 IST (1332776567367)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f2e
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[10]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:369 IST (1332776567369)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:370 IST (1332776567370)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f28
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+message: init 12 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:371 IST (1332776567371)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[11]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:372 IST (1332776567372)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f28
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:374 IST (1332776567374)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f28
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+message: 12:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:375 IST (1332776567375)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f28
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[11]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:376 IST (1332776567376)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:378 IST (1332776567378)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f22
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+message: init 13 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:379 IST (1332776567379)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[12]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:380 IST (1332776567380)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f22
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:382 IST (1332776567382)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f22
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+message: 13:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:383 IST (1332776567383)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f22
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[12]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:385 IST (1332776567385)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:386 IST (1332776567386)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f1c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+message: init 14 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:387 IST (1332776567387)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[13]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:389 IST (1332776567389)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f1c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:390 IST (1332776567390)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f1c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+message: 14:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:391 IST (1332776567391)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f1c
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[13]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:393 IST (1332776567393)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:394 IST (1332776567394)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f16
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+message: init 15 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:395 IST (1332776567395)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[14]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:397 IST (1332776567397)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f16
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:398 IST (1332776567398)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f16
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+message: 15:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:400 IST (1332776567400)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f16
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[14]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:401 IST (1332776567401)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:402 IST (1332776567402)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f10
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+message: init 16 machine
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:404 IST (1332776567404)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+transition: [PARALLEL] --> [PARALLEL.NEW]
+local state: 
+{
+    ...
+    PARALLEL[15]:OutLegFSM{
+        INIT
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:405 IST (1332776567405)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f10
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+transition: [INIT] --> [CALL.SEND_INVITE]
+local state: 
+{
+    ...
+    CALL:{
+        ...
+        SEND_INVITE
+        ...
+    }
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:406 IST (1332776567406)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f10
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+message: 16:OutLegFSM endded (send invite failure).
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:408 IST (1332776567408)
+event: MessagelessTransitionEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f10
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine).PARALLEL[15]:(OutLegFSM)
+sequence: initializing
+transition: [CALL.SEND_INVITE] --> [END]
+local state: 
+{
+    ...
+    END
+    ...
+}
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:409 IST (1332776567409)
+event: DebugEvent
+root: 1862c225:1364f71ba53:-7f77
+machine: 1862c225:1364f71ba53:-7f74
+state path: :(FeatureBoxTerminationHandlerFSM).RUN_APPLICATION:(ConferenceSampleMachine)
+sequence: initializing
+message: New attendee
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################
+time: 2012.03.26 17:42:47:410 IST (1332776567410)
+event: FeatureBoxExceptionEvent
+root: 1862c225:1364f71ba53:-7f77
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+E4SS_STACK_TRACE: org.echarts.DynamicMachineException: Attempt to create more than 16 machine pool instances
+	at org.echarts.DynamicMachine.getNextFreeIndex(DynamicMachine.java:1182)
+	at org.echarts.DynamicMachine.machineInstanceSatisfiesTarget(DynamicMachine.java:1045)
+	at org.echarts.TransitionMachine.machineInstanceSatisfiesTarget(TransitionMachine.java:931)
+	at org.echarts.TransitionMachine.fireMessagelessTransition(TransitionMachine.java:1319)
+	at org.echarts.TransitionMachine.runMessagelessTransitionSequence(TransitionMachine.java:1270)
+	at org.echarts.TransitionMachine.initializeRoot(TransitionMachine.java:1235)
+	at org.echarts.TransitionMachine.run(TransitionMachine.java:1112)
+	at org.echarts.servlet.sip.FeatureBox.advanceBoxMachine(FeatureBox.java:222)
+	at org.echarts.servlet.sip.BoxPort.input(BoxPort.java:44)
+	at org.echarts.servlet.sip.EChartsSipServlet.dispatchToFreeBox(EChartsSipServlet.java:547)
+	at org.echarts.servlet.sip.EChartsSipServlet.doRequest(EChartsSipServlet.java:485)
+	at javax.servlet.sip.SipServlet.doRequestWrapper(SipServlet.java:544)
+	at javax.servlet.sip.SipServlet.service(SipServlet.java:893)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.service(ServletWrapper.java:1657)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.service(ServletWrapper.java:1597)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain.doFilter(WebAppFilterChain.java:131)
+	at com.ibm.ws.sip.container.was.SipFilter.doFilter(SipFilter.java:116)
+	at com.ibm.ws.webcontainer.filter.FilterInstanceWrapper.doFilter(FilterInstanceWrapper.java:188)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain.doFilter(WebAppFilterChain.java:116)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterChain._doFilter(WebAppFilterChain.java:77)
+	at com.ibm.ws.webcontainer.filter.WebAppFilterManager.doFilter(WebAppFilterManager.java:908)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.handleRequest(ServletWrapper.java:934)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapper.handleRequest(ServletWrapper.java:502)
+	at com.ibm.ws.webcontainer.servlet.ServletWrapperImpl.handleRequest(ServletWrapperImpl.java:179)
+	at com.ibm.ws.webcontainer.webapp.WebApp.handleRequest(WebApp.java:3933)
+	at com.ibm.ws.webcontainer.webapp.WebGroup.handleRequest(WebGroup.java:276)
+	at com.ibm.ws.webcontainer.WebContainer.handleRequest(WebContainer.java:931)
+	at com.ibm.ws.webcontainer.WSWebContainer.handleRequest(WSWebContainer.java:1583)
+	at com.ibm.wsspi.webcontainer.WebContainer.handleRequest(WebContainer.java:95)
+	at com.ibm.ws.sip.container.was.SipMessage.dispatch(SipMessage.java:1384)
+	at com.ibm.ws.sip.container.was.SipMessage.run(SipMessage.java:1355)
+	at com.ibm.ws.sip.container.was.WebsphereInvoker.invokeSipServlet(WebsphereInvoker.java:140)
+	at com.ibm.ws.sip.container.router.SipRouter.invokeSipServlet(SipRouter.java:1483)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.handleUASRequest(TransactionUserImpl.java:1391)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.processRequestUASMode(TransactionUserImpl.java:1483)
+	at com.ibm.ws.sip.container.tu.TransactionUserImpl.processRequest(TransactionUserImpl.java:1259)
+	at com.ibm.ws.sip.container.tu.TransactionUserWrapper.processRequest(TransactionUserWrapper.java:571)
+	at com.ibm.ws.sip.container.transaction.ServerTransaction.processRequest(ServerTransaction.java:103)
+	at com.ibm.ws.sip.container.router.tasks.RequestRoutedTask.doTask(RequestRoutedTask.java:99)
+	at com.ibm.ws.sip.container.router.tasks.InitialRequestRoutedTask.doTask(InitialRequestRoutedTask.java:63)
+	at com.ibm.ws.sip.container.router.tasks.RoutedTask.run(RoutedTask.java:84)
+	at com.ibm.ws.sip.container.was.SignalingEndOfTask.run(SignalingEndOfTask.java:75)
+	at com.ibm.ws.util.ThreadPool$Worker.run(ThreadPool.java:1604)
+
+FINAL_MACHINE_STATE: :org.echarts.servlet.sip.FeatureBoxTerminationHandlerFSM{ RUN_APPLICATION:att.com.ConferenceSample.ConferenceSampleMachine{ INIT  PARALLEL[0]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[1]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[2]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[3]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[4]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[5]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[6]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[7]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[8]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[9]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[10]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[11]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[12]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[13]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[14]:att.com.ConferenceSample.OutLegFSM{ END } PARALLEL[15]:att.com.ConferenceSample.OutLegFSM{ END } } }
+############################################################
+time: 2012.03.26 17:42:47:412 IST (1332776567412)
+event: AppSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_2
+EVENT_TYPE: DESTROYED
+############################################################
+time: 2012.03.26 17:42:47:414 IST (1332776567414)
+event: SipSessionLifecycleEvent
+APP_SESSION_ID: local.1332772715413_2
+EVENT_TYPE: DESTROYED
+SIP_SESSION_ID: local.1332772715413_2_1_1
+############################################################
+time: 2012.03.26 17:42:47:415 IST (1332776567415)
+event: FeatureBoxDestroyedEvent
+root: 1862c225:1364f71ba53:-7f77
+APP_SESSION_ID: local.1332772715413_2
+BOX_ADDRESS: (null)
+BOX_ID: 1862c225:1364f71ba53:-7f75
+BOX_MACHINE_CLASS: att.com.ConferenceSample.ConferenceSampleMachine
+BOX_REGION: NEUTRAL
+############################################################

@@ -1,0 +1,36 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: HoldFSM.ech,v 1.4 2008/01/21 19:28:37 bond Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import org.echarts.servlet.sip.SipPort;
+import org.echarts.servlet.sip.machines.SendReinviteFSM;
+import org.echarts.servlet.sip.utilities.SdpUtils;
+
+/** Places a connected port on hold via black-hole SDP.
+ */
+public machine HoldFSM {
+<*
+	SipPort p;
+*>
+
+	public HoldFSM(SipPort p) {
+		this.p = p;
+	}
+
+	public initial state SEND_REINVITE : SendReinviteFSM(p, SdpUtils.createBlackHoleSDP());
+	public state SUCCESS;
+	public state FAILURE;
+
+	transition SEND_REINVITE.SUCCESS --> SUCCESS;
+	transition SEND_REINVITE.FAILURE --> FAILURE;
+}

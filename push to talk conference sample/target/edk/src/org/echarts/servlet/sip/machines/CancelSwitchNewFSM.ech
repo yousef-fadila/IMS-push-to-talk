@@ -1,0 +1,101 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: CancelSwitchNewFSM.ech,v 1.5 2008/04/18 14:32:46 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+
+/** Switches common port from oldCall to newCall (where oldCall is not yet connected).
+ *
+ * <ol>
+ * <li>Tears down old call</li>
+ * <li>Places call to newCall </li>
+ * <li>Upon success response from newCall, propagates to common</li>
+ * </ol>
+ */
+
+public machine CancelSwitchNewFSM  {
+<*
+	SipPort common, oldCall, newCall;
+	SipServletRequest commonInvite, oldInvite, newInvite;
+
+	private final static String SUCCESS_RESPONSE = "SUCCESS_RESPONSE";
+	
+	private void setSuccessResponse(SuccessResponse r) {
+		newCall.setAttribute(SUCCESS_RESPONSE, r);
+	}
+	
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) newCall.getAttribute(SUCCESS_RESPONSE);
+	}
+*>
+
+	public CancelSwitchNewFSM(SipPort common, SipPort oldCall, SipPort newCall) {
+		this.common  = common;
+		this.oldCall = oldCall;
+		this.newCall = newCall;
+
+		commonInvite = common.getInitialRequest();
+		oldInvite = oldCall.getInitialRequest();
+		newInvite = newCall.getInitialRequest();
+	}
+
+	public initial state CALLS : concurrent {
+		state TEARDOWN_OLD_CALL : SipPortTeardownFSM(oldCall);
+		public state PLACE_NEW_CALL : {
+			public initial state INIT;
+			public state WAIT_RESPONSE;
+			public state CONNECTED;
+
+			transition INIT - / 
+				newCall!newInvite
+			-> WAIT_RESPONSE;
+
+			// propagate 1xx
+			//
+			transition WAIT_RESPONSE 
+				- newCall?ProvisionalResponse /
+				common!common.createResponse(message, commonInvite)
+			-> WAIT_RESPONSE;
+
+			transition WAIT_RESPONSE 
+				- newCall?SuccessResponse / {
+				setSuccessResponse(message);
+				newCall!message.createAck();
+			} -> CONNECTED;
+
+			// TODO : handle error cases
+			transition WAIT_RESPONSE - newCall?FinalResponse -> DISCONNECTED;
+
+			public state DISCONNECTED;
+		};
+	};
+
+	state CONNECT_COMMON;
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+	
+	// oldCall is gone, newCall is connected
+	//
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.PLACE_NEW_CALL.CONNECTED ] - /
+		common!common.createResponse(getSuccessResponse(), commonInvite)
+	-> CONNECT_COMMON;
+
+	transition CONNECT_COMMON - common?Ack -> SUCCESS;
+
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.PLACE_NEW_CALL.DISCONNECTED ] -
+	-> FAILURE;
+}

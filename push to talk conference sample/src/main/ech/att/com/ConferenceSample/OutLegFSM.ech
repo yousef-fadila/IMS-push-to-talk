@@ -1,0 +1,275 @@
+/**************************************************************
+ *       Template machine for ECharts for SIP Servlets        *
+ **************************************************************/
+
+// $Name:  $ $Id: $
+
+package att.com.ConferenceSample;
+
+import java.util.*;
+import javax.servlet.ServletContext;
+import javax.servlet.sip.*;
+import javax.servlet.sip.ar.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.sdp.*;
+import org.echarts.servlet.sip.utilities.SdpUtils;
+import org.echarts.servlet.sip.*;
+import java.net.Socket;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import org.echarts.servlet.sip.messages.Info;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.utilities.*;
+import finals.*;
+import messages.*;
+import att.com.ConferenceSample.*;
+
+/** 
+ * Represnets a Participent in a conference room
+ */
+public machine OutLegFSM{
+<*
+	FeatureBox     box;
+	Properties     servletProps;
+	ServletContext servletContext;
+
+	SipPort callee;
+	
+	private SipServletRequest initialInvite;	
+	private boolean isMachineReady = false;			
+	
+	/** Saved when recieving an Invite**/
+	private int audioRtpPort = -1;
+	private String audioRtpIp = null;
+	private String username = null;
+
+	private static final String DTMF_MSG_TYPE = "application/dtmf-relay";
+	private static final String DTMF_SIGNAL_STR = "Signal=";
+	private static final String INVITE_REC_ORIGIN_FIELD_ADDENDA = " IP4";
+	
+	/** A Port to send messages to the Conference Machine**/
+	private InternalPort controlPort;
+	
+	private boolean isDtmfMsg(Info dtmfMsg) {
+		System.out.println("Got Sip info of type " +dtmfMsg.getContentType());
+		return dtmfMsg != null && DTMF_MSG_TYPE.equals(dtmfMsg.getContentType());
+	}
+	
+	private OutLegMessage createOutLegMsg(Info dtmfMsg) {
+		System.out.println("Generate a OutLegMessage");
+		OutLegMessage retVal;
+			try {
+			  String  charset = "UTF-8"; // RFC 3261
+		      //Save the SDP content in a String
+			  
+		      byte[] rawContent = dtmfMsg.getRawContent();
+		      putEvent(new DebugEvent("AConference chekc PTT ON:" + rawContent));
+		      String myContent = new String(rawContent, charset);
+		      char dtmf_char = myContent.charAt(myContent.indexOf(DTMF_SIGNAL_STR) + DTMF_SIGNAL_STR.length() );
+		      switch (dtmf_char) {
+			  case '1': 
+				  retVal =  new OutLegMessage(audioRtpIp, audioRtpPort,username ,MediaServerCommand.PTTON);
+		    	  break;
+		      case '2':
+		    	  retVal =  new OutLegMessage(audioRtpIp, audioRtpPort, username, MediaServerCommand.PTTOFF);
+		    	  break;
+		      default:
+		    	  retVal =  new OutLegMessage(audioRtpIp, audioRtpPort, username, MediaServerCommand.ILLEGAL);		    	  
+		      }		      
+			} catch (Exception e) {
+				System.out.println("Error Check PTT Incoming " + dtmfMsg+ " Exception" + e);
+				retVal =  new OutLegMessage(audioRtpIp, audioRtpPort, username, MediaServerCommand.ILLEGAL);
+			}
+		return retVal;
+	}
+
+	private MediaServerCommand dtmfCommandType(Info dtmfMsg) {
+		System.out.println("Generate a OutLegMessage");
+		MediaServerCommand retVal;
+			try {
+			  String  charset = "UTF-8"; // RFC 3261
+		      //Save the SDP content in a String			  
+		      byte[] rawContent = dtmfMsg.getRawContent();
+		      putEvent(new DebugEvent("AConference chekc PTT ON:" + rawContent));
+		      String myContent = new String(rawContent, charset);
+		      char dtmf_char = myContent.charAt(myContent.indexOf(DTMF_SIGNAL_STR) + DTMF_SIGNAL_STR.length() );		      
+		      switch (dtmf_char) {
+		      case '1': 
+		    	  retVal = MediaServerCommand.PTTON;
+		    	  break;
+		      case '2':
+		    	  retVal = MediaServerCommand.PTTOFF;
+		    	  break;
+		      default:
+		    	  retVal = MediaServerCommand.ILLEGAL;		    	  	
+		      }
+			} catch (Exception e) {
+				System.out.println("Error Check PTT Incoming " + dtmfMsg+ " Exception" + e);
+				retVal =  MediaServerCommand.ILLEGAL;
+			}					
+		return retVal;
+	}
+	
+	private boolean bindInvite() {
+		boolean retVal = false;
+		try {
+			callee.bind(initialInvite);
+			retVal = true;
+		} catch (Exception e) {
+			System.out.println("Failed to bind invite to port " + initialInvite);			
+		}
+		return retVal;
+	}
+	
+	private SipServletResponse createResponse() {
+		  try {			  
+	   		  String  charset = "UTF-8"; // RFC 3261
+		      //Save the SDP content in a String
+		      byte[] rawContent = initialInvite.getRawContent();
+		      putEvent(new DebugEvent("going to send invite:" + rawContent));
+		      String myContent = new String(rawContent, charset);
+			  SdpFactory sdpf = SdpFactory.getInstance();
+			  
+			  SessionDescription sdp = sdpf.createSessionDescription(myContent );
+			  Origin origin = sdp.getOrigin();
+			  audioRtpIp = origin.getAddress();
+			  
+			  origin.setAddress(MediaServerFinals.MEDIA_REPLICATOR_IP+INVITE_REC_ORIGIN_FIELD_ADDENDA);
+			  Vector<MediaDescription> mds = sdp.getMediaDescriptions(false);
+			  
+              Connection con = sdp.getConnection();
+              con.setAddress(MediaServerFinals.MEDIA_REPLICATOR_IP);
+			 
+			 // TODO handle single Audio stream
+			 for(MediaDescription md:mds) {
+				  if ("audio".equals(md.getMedia().getMediaType())){
+					  System.out.println("Media Of type" + md.getMedia());
+					  audioRtpPort = md.getMedia().getMediaPort();
+					  md.getMedia().setMediaPort(MediaServerFinals.MEDIA_REPLICATOR_RTP_PORT);
+				  }
+			 }		  
+
+			SipURI sipuri= (SipURI) initialInvite.getFrom().getURI();
+			username = sipuri.getUser();
+			System.out.println("Fetch username " + username);
+			
+			SipServletResponse resp = initialInvite.createResponse(SipServletResponse.SC_OK);
+			resp.setContent(sdp.toString().getBytes(),initialInvite.getContentType());
+			
+			return resp;
+		  }catch (Exception e) {
+			 System.out.println("Failed to create OK response for Invite " + initialInvite + " " +e);
+			 return null;
+		  }
+	}
+*>	
+	public OutLegFSM(FeatureBox box, SipPort aCallee, SipServletRequest aInvite, InternalPort controlPort) { <*
+		try{
+			this.box            = box;
+			this.callee			= aCallee;
+			this.initialInvite	= aInvite;			
+		
+			
+			putEvent(new DebugEvent("init machine"));
+			isMachineReady = true;	
+			this.controlPort = controlPort;
+			
+		}catch(Exception e){
+			 putEvent(new DebugEvent("Exception during Initialization" + e));
+		}
+	*> 
+	}
+	
+	initial state INIT;
+	state CALL:{
+		initial state SEND_INVITE_RESPONSE;
+		state WAIT_FOR_RESP;
+		state SUCCESS;
+		state SUCCESS_CONTINUE;
+		state CONNECTED;
+	
+		concurrent state TEARDOWN_EVENT:{
+			initial state IDLE;
+			state START; 
+			state TD: SipPortTeardownFSM(callee, true); 
+			
+			transition START-/{
+				putEvent(new DebugEvent(" PortState="+callee.getPortState()));
+			}->TD;			
+		}
+	};
+		
+
+	transition INIT - [ isMachineReady ] /{
+	}-> CALL.SEND_INVITE_RESPONSE
+	else /{
+		putEvent(new DebugEvent("OutLegFSM endded (initialization)."));
+	}-> END;
+	
+	transition CALL.SEND_INVITE_RESPONSE - [(true == bindInvite())] /{
+		callee ! createResponse();		
+	}-> CALL.SUCCESS_CONTINUE
+	else /{
+		putEvent(new DebugEvent("OutLegFSM endded (send invite failure)."));
+	}-> END;
+		
+	transition CALL.WAIT_FOR_RESP - callee ? ProvisionalResponse / {
+	} -> CALL.WAIT_FOR_RESP;
+	
+	transition CALL.WAIT_FOR_RESP - callee ? Request /{ 
+		putEvent(new DebugEvent("OutLegFSM ignores unsupported request" + message.getMethod()));
+		callee ! callee.createResponse(405, message);		
+	} -> CALL.WAIT_FOR_RESP;
+	
+	transition CALL.WAIT_FOR_RESP - callee ? FinalResponse /{
+		putEvent(new DebugEvent("OutLegFSM endded (reject from callee). " + message.getStatus()));
+	} -> END;
+	
+	transition CALL.WAIT_FOR_RESP - callee ? SuccessResponse / {
+		putEvent(new DebugEvent("Got Success Responsee"));		
+	} -> CALL.SUCCESS;
+	
+	transition CALL.SUCCESS -/{
+		putEvent(new DebugEvent("WARNING!!!!! parend suppose to override this transition!!!"));
+	}->CALL.SUCCESS_CONTINUE;
+	
+	transition CALL.SUCCESS_CONTINUE - callee ? Ack /{
+	<*		
+			OutLegMessage msg = new OutLegMessage(audioRtpIp, audioRtpPort, username, MediaServerCommand.ADD);
+			controlPort.output(msg,this);	
+	*>
+	} ->CALL.CONNECTED;
+	
+	transition CALL.CONNECTED - callee ? Info [isDtmfMsg(message) == true]/ {
+			<*
+			if (MediaServerCommand.ILLEGAL != dtmfCommandType(message))
+			 {
+			   OutLegMessage outLegMsg = createOutLegMsg(message);
+			   controlPort.output(outLegMsg,this);		
+			 }
+			 *>
+			 callee ! callee.createResponse(SipServletResponse.SC_OK, message);
+	}->CALL.CONNECTED;
+
+	transition CALL.CONNECTED - callee ? Request / {	
+		putEvent(new DebugEvent("OutLegFSM.CONNECTED ignores unsupported request" + message.getMethod()));
+		callee ! callee.createResponse(SipServletResponse.SC_METHOD_NOT_ALLOWED, message);		
+	} -> CALL.CONNECTED;
+	
+	transition CALL.CONNECTED - callee ? Bye / {
+		putEvent(new DebugEvent("OutLegFSM endded (BYE from callee)."));
+		<*		
+			OutLegMessage msg = new OutLegMessage(audioRtpIp, audioRtpPort, username, MediaServerCommand.REMOVE);
+			controlPort.output(msg,this);	
+		*>
+		callee ! callee.createResponse(SipServletResponse.SC_OK, message);
+	} -> END;
+	
+	transition CALL.TEARDOWN_EVENT.TD.TERMINAL - /{
+		putEvent(new DebugEvent("OutLegFSM endded (TEARDOWN by Parent)."));
+	}->END;
+		
+	state END;
+}

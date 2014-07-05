@@ -1,0 +1,91 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: HoldSwitchFSM.ech,v 1.3 2008/01/21 19:08:46 bond Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Places oldCall on hold, while switching common port to newCall
+ * (which is currently a connected call).
+ *
+ * <ol>
+ * <li>Places oldCall on hold (via re-INVITE with blackhole SDP)</li>
+ * <li>Sends re-INVITE to newCall (using SDP of original INVITE)</li>
+ * <li>Upon success response from newCall, sends re-INVITE to common</li>
+ * </ol>
+ */
+
+public machine HoldSwitchFSM {
+<*
+	SipPort common;
+	SipPort oldCall;
+	SipPort newCall;
+
+	SipServletRequest newInvite;
+	public Response sessionProgressResponse, successResponse, failureResponse;
+*>
+
+	public HoldSwitchFSM(SipPort common, SipPort oldCall, SipPort newCall) { <*
+		this.common  = common;
+		this.oldCall = oldCall;
+		this.newCall = newCall;
+
+		// create re-INVITE ...
+		newInvite = newCall.createRequest("INVITE");
+		// ... using SDP of initial call 
+		// (assume SDP has not changed since ---
+		//  this will eventually be the job of media layer)
+		SipServletRequest origInvite = newCall.getInitialRequest();
+		newInvite.setContent(origInvite.getContent(), origInvite.getContentType());
+	*> }
+
+	public initial state CALLS : concurrent {
+		state HOLD_OLD_CALL    : HoldFSM(oldCall);
+		state CONNECT_NEW_CALL : SendReinviteFSM(newCall, newInvite);
+	};
+
+	// TODO : if common was already re-INVITEd in PLACE_NEW_CALL,
+	// there is no need to do so again
+	//
+	state COMMON_REINVITE : SendReinviteFSM(common, successResponse);
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+
+	/** oldCall is on hold, newCall is connected
+	 */
+	transition [ 
+		CALLS.HOLD_OLD_CALL.SUCCESS, 
+		CALLS.CONNECT_NEW_CALL.SUCCESS
+	] --> COMMON_REINVITE;
+
+	transition COMMON_REINVITE.SUCCESS --> SUCCESS;
+
+	transition COMMON_REINVITE.FAILURE --> FAILURE;
+
+	/** Prevent message queuing so auto-termination will apply --- just drop on the floor
+	 */
+	transition CALLS - common?Object -> CALLS.DEEP_HISTORY;
+
+	/** oldCall is in terminal state, but newCall failed
+	 */
+	transition [ CALLS.HOLD_OLD_CALL.TERMINAL, CALLS.CONNECT_NEW_CALL.FAILURE ] --> FAILURE;
+
+	/** failed to hold oldCall
+	 */
+	transition [ CALLS.HOLD_OLD_CALL.FAILURE, CALLS.CONNECT_NEW_CALL.TERMINAL ] --> FAILURE;
+}

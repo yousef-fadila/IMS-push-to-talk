@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.echarts</groupId>
+    <artifactId>e4ss-project-with-test-harness-parent</artifactId>
+    <version>2.6.13</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>att.com</groupId>
+  <artifactId>ConferenceSample</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>ConferenceSample</name>
+  <url>http://echarts.org</url>
+
+  <properties>
+  </properties>
+
+  <dependencies>
+  </dependencies>
+
+  <build>
+  </build>
+
+  <!--
+    These repositories should generally be added to either your 
+    ~/.m2/settings.xml file or to your organization's repository
+    manager. Otherwise, uncomment the <repositories> and 
+    <pluginRepositories> blocks. The JBoss public repository is used
+    to retrieve the sip-servlets api jar from Mobicents.
+   -->
+   <!--
+    <repositories>
+      <repository>
+        <id>echarts-snapshot-repository</id>
+        <name>ECharts public snapshot repository</name>
+        <url>http://echarts.sourceforge.net/repo/maven/snapshots/</url>
+      </repository>
+      <repository>
+        <id>echarts-repository</id>
+        <name>ECharts public release repository</name>
+        <url>http://echarts.sourceforge.net/repo/maven/releases/</url>
+      </repository>
+
+      <repository>
+        <id>jboss-public-repository</id>
+        <name>JBoss public repository</name>
+        <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+      </repository>
+    </repositories>
+
+    <pluginRepositories>
+      <pluginRepository>
+        <id>echarts-plugin-snapshot-repository</id>
+        <name>ECharts public plugin snapshot repository</name>
+        <url>http://echarts.sourceforge.net/repo/maven/snapshots/</url>
+      </pluginRepository>
+      <pluginRepository>
+        <id>echarts-plugin-repository</id>
+        <name>ECharts public plugin release repository</name>
+        <url>http://echarts.sourceforge.net/repo/maven/releases/</url>
+      </pluginRepository>
+    </pluginRepositories>
+  -->
+
+
+</project>

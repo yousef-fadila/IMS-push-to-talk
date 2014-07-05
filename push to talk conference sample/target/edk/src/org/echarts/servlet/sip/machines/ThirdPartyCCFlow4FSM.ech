@@ -1,0 +1,314 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2008 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Id: ThirdPartyCCFlow4FSM.ech 1752 2011-02-14 21:16:28Z yotommy $
+
+package org.echarts.servlet.sip.machines;
+
+import java.util.Properties;
+import java.net.InetAddress;
+import java.util.Iterator;
+import javax.servlet.sip.*;
+import javax.servlet.ServletContext;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Uses third-party call control to set up a call between two far parties,
+ * See constructor for parameters.
+ * 
+ * Note that Cisco gateways do not appear to support this call flow acting
+ * as UA A.  When tested with c3640-is-mz.123-14.T7 and
+ * c3825-advipservicesk9-mz.124-11.T2, the Cisco gateway responds with
+ * (1) INVITE offer1 no media with reponses with SDP answer that contains
+ * media. After Controller sends (3) ACK with no SDP, the gateway sends BYE.
+ *
+ * This fragment uses RFC 3725 Third Party Call Control (3pcc)
+ * call establishment flow IV to establish a call between two
+ * parties.
+ * <pre>
+ *             A                 Controller                  B
+ *             |(1) INVITE offer1     |                      |
+ *             |no media              |                      |
+ *             |<---------------------|                      |
+ *             |(2) 200 answer1       |                      |
+ *             |no media              |                      |
+ *             |--------------------->|                      |
+ *             |(3) ACK               |                      |
+ *             |<---------------------|                      |
+ *             |                      |(4) INVITE no SDP     |
+ *             |                      |--------------------->|
+ *             |                      |(5) 200 OK offer2     |
+ *             |                      |<---------------------|
+ *             |(6) INVITE offer2'    |                      |
+ *             |<---------------------|                      |
+ *             |(7) 200 answer2'      |                      |
+ *             |--------------------->|                      |
+ *             |                      |(8) ACK answer2       |
+ *             |                      |--------------------->|
+ *             |(9) ACK               |                      |
+ *             |<---------------------|                      |
+ *             |(10) RTP              |                      |
+ *             |.............................................|
+ * </pre>
+ * Note that there are several limitations in the implementation:
+ * <ul>
+ * <li>
+ * The required SDP manipulations from offer2 to offer2' and answer2' to answer2
+ * are not implemented.  In practice, most UAs do not check the origin line
+ * in the SDP.
+ * </li>
+ * <li>
+ * Error handling described in RFC 3725 sec 5 are not fully implemented.
+ * For example, the re-INVITE glare error condition in Figure 5 is not
+ * handled.  In this glare condition, UA A sends re-INVITE after step (5),
+ * this creating a re-INVITE glare with (6).
+ * There is a problem with the recommendation that the
+ * controller sends a 491 response.  Proper handling of this case requires
+ * more investigation.
+
+ * </li>
+ * </ul>
+ */
+public machine ThirdPartyCCFlow4FSM  {
+<*
+	SipPort caller;
+	SipPort callee;
+	SipFactory factory;
+
+	SipURI party1, party2, from;
+	SipServletRequest  invite;
+	SipServletResponse responseToMatch = null;
+	Object sdp;
+	int firstPartyTimeoutMsec;
+	String ourDomain;
+	String uid;
+	Properties headers;
+	Object sdp2;
+
+	String fromUserForCaller = null;
+	String fromUserForCallee = null;
+
+	boolean isEarlyMedia;
+
+	SipURI createFromURI(String str) throws ServletParseException {
+		if( str != null ) {
+			if( str.startsWith("sip:") || str.startsWith("sips:") ) {
+				return ((SipURI) factory.createURI(str));
+			} else {
+			        return factory.createSipURI(str, ourDomain);
+			}
+		} else {
+			return factory.createSipURI(null, ourDomain);
+		}
+	}
+*>
+
+	/** First calls callerSipURI on caller SipPort, then call calleeSipURI on calleeSipPort.
+	 * @param callerSipURI SIP URI of first party.  This will be put into Request-URI of INVITE sent out on caller SipPort.
+	 * @param calleeSipURI SIP URI of second party.  This will be put into Request-URI of INVITE sent out on callee SipPort.
+	 * @param firstPartyTimeoutMsec Duration for first party to answer before abandoning call (-1 means no timeout)
+	 * @param isEarlyMedia If true, early media on call to second party (i.e. SDP in provision response to the INVITE) causes re-INVITE to be sent to first party.
+	 */
+
+	public ThirdPartyCCFlow4FSM(SipFactory factory, SipPort caller, SipPort callee, String callerSipURI, String calleeSipURI, int firstPartyTimeoutMsec, boolean isEarlyMedia, String uid) { <*
+
+		this.factory = factory;
+		this.caller = caller;
+		this.callee = callee;
+
+		party1 = (SipURI) factory.createURI(callerSipURI);
+		party2 = (SipURI) factory.createURI(calleeSipURI);
+
+		this.firstPartyTimeoutMsec = firstPartyTimeoutMsec;
+		this.isEarlyMedia = isEarlyMedia;
+		this.uid = uid;
+
+		// Since these are not specified, use the user portion
+		// of other party's SIP URI as the user part of the
+		// From address ("caller ID")
+		//
+		this.fromUserForCaller = party2.getUser();
+		this.fromUserForCallee = party1.getUser();
+		
+		ourDomain = InetAddress.getLocalHost().getHostName();
+		headers = new Properties();
+
+		from = factory.createSipURI(fromUserForCaller, ourDomain);
+		// TODO copyParameters(party2, from)?  In ThirdPartyCCFlow1FSM
+	*> }
+
+	/** First calls callerSipURI on caller SipPort, then call calleeSipURI on calleeSipPort.
+	 * @param callerSipURI SIP URI of first party.  This will be put into Request-URI of INVITE sent out on caller SipPort.
+	 * @param fromUserForCaller From address sent to first party.  Can be used to affect Caller-ID.  Can be full SIP URI or just user part.
+	 * @param calleeSipURI SIP URI of second party.  This will be put into Request-URI of INVITE sent out on callee SipPort.
+	 * @param fromUserForCallee From address sent to second party.  Can be used to affect Caller-ID.  Can  be full SIP URI or just user part.
+	 * @param firstPartyTimeoutMsec Duration for first party to answer before abandoning call (-1 means no timeout)
+	 * @param isEarlyMedia If true, early media on call to second party (i.e. SDP in provision response to the INVITE) causes re-INVITE to be sent to first party.
+	 */
+
+	public ThirdPartyCCFlow4FSM(SipFactory factory, SipPort caller, SipPort callee, String callerSipURI, String fromUserForCaller, String calleeSipURI, String fromUserForCallee, int firstPartyTimeoutMsec, boolean isEarlyMedia, String uid) { <*
+
+		this.factory = factory;
+		this.caller = caller;
+		this.callee = callee;
+
+		party1 = (SipURI) factory.createURI(callerSipURI);
+		party2 = (SipURI) factory.createURI(calleeSipURI);
+
+		if( fromUserForCaller != null )
+			this.fromUserForCaller = fromUserForCaller;
+		if( fromUserForCallee != null )
+			this.fromUserForCallee = fromUserForCallee;
+
+		this.firstPartyTimeoutMsec = firstPartyTimeoutMsec;
+		this.isEarlyMedia = isEarlyMedia;
+		this.uid = uid;
+		
+		ourDomain = InetAddress.getLocalHost().getHostName();
+		headers = new Properties();
+
+		from = createFromURI(fromUserForCaller);
+	*> }
+
+	/** Initial state - Place call to first party
+	 */
+	public initial state CALL_FIRST_PARTY : CallFSM(caller, from, party1, SdpUtils.createNoMediaSDP().toString());
+
+	/** Upon success of call to first party, snag the SDP from the final
+	 *  response to be used to call second party.
+	 */
+	transition CALL_FIRST_PARTY.SUCCESS - / <*
+		sdp = CALL_FIRST_PARTY.getFinalResponse().getContent();
+	
+		// for first party, "From" should be first party @ our domain
+		from = createFromURI(fromUserForCallee);
+		if( uid != null) headers.setProperty("X-ECHARTS-UID", uid);
+	*> -> CALL_SECOND_PARTY;
+
+	/** And-machine:
+	 *   CALLEE machine places call to second party (callee)
+	 *   CALLER machine sends re-INVITE to caller based on callee response
+	 */
+	public state CALL_SECOND_PARTY : concurrent {
+
+		public state CALLEE : {
+			public initial state CALL : CallFSM(callee, from, party2, null, headers);
+		};
+
+		public state CALLER : {
+			/** Start out idle, wait for parent to invoke transition.
+			 */
+			initial state IDLE;
+
+			/** Send re-INVITE to caller based on callee response.
+			 */
+			state REINVITE : SendReinviteFSM(caller, responseToMatch);
+			
+			/** Successful re-INVITE completed
+			 */
+			transition REINVITE.SUCCESS - / <*
+				sdp2 = REINVITE.getSuccessResponse().getContent();
+			*> -> REINVITED;
+
+			/** Successful re-INVITE completed
+			 */
+			// nonterminal is required to prevent DEEP_HISTORY transition from recreating the
+			//  machine and going to its initial state (since REINVITED would be terminal
+			//  otherwise).
+			//
+			nonterminal state REINVITED;
+
+			// TODO : handle REINVITE.FAILURE --- what is the desired behavior?
+		};
+
+		/** Received early media from callee.  Save response.
+		 * if isEarlyMedia is true, then also send re-INVITE to caller.
+		 * (Must use as specific source state in CALLEE to override
+		 *  the ProvisionalResponse handling.)
+		 */
+		transition [ CALLER.IDLE, CALLEE.CALL.EARLY_MEDIA ] - [ isEarlyMedia ] /
+			responseToMatch = CALLEE.CALL.getEarlyMediaResponse();
+		-> [ CALLER.REINVITE, CALLEE.DEEP_HISTORY ]
+		else [ <* responseToMatch == null *> ] /
+			responseToMatch = CALLEE.CALL.getEarlyMediaResponse();
+		-> [ CALLER.DEEP_HISTORY, CALLEE.DEEP_HISTORY ];
+
+		/** Successful call to callee, so re-INVITE caller if IDLE
+		 * (Don't need to re-INVITE if already happened due to early media)
+		 * This transition overrides the one defined in CALL above.
+		 *
+		 * N.B. We do not transition to CALLEE.DEEP_HISTORY because that would
+		 * cause machine to be re-entered at initial state (because this
+		 * transition destroys machine in terminal state).  
+		 */
+		transition [ CALLER.IDLE, CALLEE.CALL.SEND_ACK ] - /
+		<*
+			// If responseToMatch is not already set when provisional
+			// response with early media was received earlier.
+			if (responseToMatch == null) {
+				responseToMatch = CALLEE.CALL.getFinalResponse();
+			}
+		*>
+		-> [ CALLER.REINVITE, CALLEE.CALL.SUCCESS ];
+
+
+		/** Prevent message queueing so that auto-termination will trigger
+		 * if caller sends BYE.  All other messages are absorbed.
+		 */
+		transition CALLER - caller ? Object -> CALLER.DEEP_HISTORY;
+
+		/**
+		   Override callee's CallFSM so it doesn't send ACK on receipt of 200.
+		 */
+		transition [ CALLER.REINVITE, CALLEE.CALL.SEND_ACK ] --> [ CALLEE.CALL.SUCCESS ];
+
+		/**
+		   Override callee's CallFSM so it doesn't send ACK on receipt of 200.
+		 */
+		transition [ CALLER.REINVITED, CALLEE.CALL.SEND_ACK ] --> [ CALLEE.CALL.SUCCESS ];
+
+	};
+
+
+		transition [ CALL_SECOND_PARTY.CALLER.REINVITED, CALL_SECOND_PARTY.CALLEE.CALL.SUCCESS ] - / {
+		<*
+			SipServletRequest ack = CALL_SECOND_PARTY.CALLEE.CALL.getFinalResponse().createAck();
+			ack.setContent(sdp2, "application/sdp");
+			callee.output(ack, this);
+		*>
+	} -> TRANSPARENT;
+
+	/** Steady state : transparent behavior between caller and callee
+	 */
+	public state TRANSPARENT : TransparentFSM(caller, callee);
+
+	/** End of steady state 
+	 */
+	transition TRANSPARENT.TERMINAL --> END;
+	
+	/** Simple end state 
+	 */
+	public state END;
+
+	// ERROR CONDITIONS
+
+	/** Terminate if first party does not answer before specified timeout
+	 */
+	transition CALL_FIRST_PARTY - delay( firstPartyTimeoutMsec ) -> END;
+
+	/** Terminate if call to first party is unsuccessful
+	 */
+	transition CALL_FIRST_PARTY.FAILURE --> END;
+
+	/** Terminate if call to second party is unsuccessful
+	 */
+	transition CALL_SECOND_PARTY.CALLEE.CALL.FAILURE --> END;
+}

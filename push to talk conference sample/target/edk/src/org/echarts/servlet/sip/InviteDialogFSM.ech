@@ -1,0 +1,429 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: InviteDialogFSM.ech 1960 2012-01-03 19:38:15Z prakashkolan $;
+
+package org.echarts.servlet.sip;
+
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+import javax.servlet.sip.SipServletMessage;
+import javax.servlet.sip.SipServletRequest;
+import javax.servlet.sip.SipServletResponse;
+
+/** FSM to track state of an INVITE dialog on a SipPort. 
+ */
+public machine InviteDialogFSM  { 
+<*
+	public static final String PENDING_REQUEST = "InviteDialogFSM_PENDING_REQUEST";
+	
+	SipPort thisPort;
+	RemotePort remote;
+	private Invite inviteMsg;
+
+	private boolean isPendingAckInput = false;
+	private boolean isPendingAckOutput = false;
+
+	void setPendingRequest(SipServletRequest req) {
+		thisPort.setAttribute(PENDING_REQUEST, req);
+	}
+
+	SipServletRequest getPendingRequest() {
+		return (SipServletRequest) thisPort.getAttribute(PENDING_REQUEST);
+	}
+
+	void clearPendingRequest() {
+		thisPort.removeAttribute(PENDING_REQUEST);
+	}
+
+	boolean isPendingResponse(SipServletResponse resp) throws Exception {
+		return SipServletUtils.compareSipServletRequests(getPendingRequest(), resp.getRequest());
+	}
+
+	boolean isResponseToInitialRequest(SipServletResponse resp) throws Exception {
+		return SipServletUtils.compareSipServletRequests(thisPort.getInitialRequest() ,resp.getRequest());		
+	}
+
+	private void logSipDialogInputEvent(SipServletMessage msg) throws Exception {
+		if (EChartsSipServlet.logDialogEvents) {
+			getMachineMonitor().putEvent(new SipDialogInputEvent(msg));
+		}
+	}
+
+	private void logSipDialogOutputEvent(SipServletMessage msg) throws Exception {
+		if (EChartsSipServlet.logDialogEvents) {
+			getMachineMonitor().putEvent(new SipDialogOutputEvent(msg));
+		}
+	}
+	
+	private boolean isDialogEstablishingMessage(SipServletMessage msg) {
+		// If the To address contains a tag parameter, then this is a dialog-establishing message
+		//
+		if( msg.getTo().getParameter("tag") != null )
+			return true;
+		else
+			return false;
+	}
+*>
+	InviteDialogFSM(SipPort thisPort, RemotePort remote, Invite inviteMsg) { <*
+		this.thisPort = thisPort;
+		this.remote = remote;
+		this.inviteMsg = inviteMsg;
+		if (inviteMsg != null) {
+			inviteMsg.getSession().setAttribute(PENDING_REQUEST, inviteMsg);
+		}
+
+		// this section gets executed when FSM is constructed, so
+		// set the initial port state here, in case no messages
+		// are processed on this port, and thus .run() is never called
+		thisPort.setPortState(PortState.START);
+	*> }
+
+	initial state START;
+
+	state INVITE_RECEIVED
+		entry {
+			logSipDialogInputEvent(inviteMsg);
+			thisPort.setPortState(PortState.INVITE_RECEIVED);
+		}
+		
+	state INVITE_RECEIVED_EARLY_DIALOG
+		entry thisPort.setPortState(PortState.INVITE_RECEIVED_EARLY_DIALOG);
+
+	state INVITE_SENT
+		entry {
+			logSipDialogOutputEvent(inviteMsg);
+			thisPort.setPortState(PortState.INVITE_SENT);
+		}
+		
+	state INVITE_SENT_EARLY_DIALOG
+		entry thisPort.setPortState(PortState.INVITE_SENT_EARLY_DIALOG);
+
+	state CONFIRMED
+		entry {
+			thisPort.setPortState(PortState.CONFIRMED);
+			inviteMsg = null;
+			clearPendingRequest();
+		};
+
+	state BYE_SENT
+		entry thisPort.setPortState(PortState.BYE_SENT);
+
+	state BYE_RECEIVED
+		entry thisPort.setPortState(PortState.BYE_RECEIVED);
+
+	state CANCEL_SENT
+		entry thisPort.setPortState(PortState.CANCEL_SENT);
+
+	state END
+		entry thisPort.setPortState(PortState.END);
+
+	transition START - thisPort ? Invite / {
+		// Sigh --- cannot use the standard method to setPendingRequest
+		// via a call to thisPort.setAttribute(), because thisPort may
+		// not have a SipSession associated with it to hold the attribute.
+		//
+		// However we know the SipSession exists, even if thisPort doesn't
+		// know about it yet.  So get the SipSession from the *message* and
+		// use that to set the attribute, which can later be retrieved
+		// via the SipPort.getAttribute() call.
+		//
+		// TODO : put code like this in SipPort.getAttribute()?  bind() here???
+		//
+		message.getSession().setAttribute(PENDING_REQUEST, message);
+	} -> INVITE_RECEIVED;
+	
+	transition INVITE_RECEIVED - remote ? ProvisionalResponse 
+	[ isResponseToInitialRequest(message) && isDialogEstablishingMessage(message) ] 
+		-> INVITE_RECEIVED_EARLY_DIALOG
+	else [ isResponseToInitialRequest(message) && !isDialogEstablishingMessage(message) ]
+		-> INVITE_RECEIVED;
+		
+	transition INVITE_RECEIVED_EARLY_DIALOG - remote ? ProvisionalResponse 
+	-> INVITE_RECEIVED_EARLY_DIALOG;
+
+	transition INVITE_RECEIVED - remote ? SuccessResponse 
+		[ isResponseToInitialRequest(message) ] / {
+		logSipDialogOutputEvent(message);
+		isPendingAckInput = true;
+	} -> CONFIRMED;
+
+	transition INVITE_RECEIVED_EARLY_DIALOG - remote ? SuccessResponse 
+		[ isResponseToInitialRequest(message) ] / {
+		logSipDialogOutputEvent(message);
+		isPendingAckInput = true;
+	} -> CONFIRMED;
+
+	transition INVITE_RECEIVED - remote ? FinalResponse 
+		[ isResponseToInitialRequest(message) ] /
+		logSipDialogOutputEvent(message);
+	-> END;
+
+	transition INVITE_RECEIVED_EARLY_DIALOG - remote ? FinalResponse 
+		[ isResponseToInitialRequest(message) ] /
+		logSipDialogOutputEvent(message);
+	-> END;
+	
+	// handle received Cancel
+	//
+	transition START           - thisPort ? Cancel /
+		logSipDialogInputEvent(message);
+	-> END;
+
+	transition INVITE_RECEIVED - thisPort ? Cancel /
+		logSipDialogInputEvent(message);
+	-> END;
+
+	transition INVITE_RECEIVED_EARLY_DIALOG - thisPort ? Cancel /
+		logSipDialogInputEvent(message);
+	-> END;
+	
+	// handle received Bye (allowed per RFC 3261 sec. 15)
+	//
+	transition INVITE_RECEIVED_EARLY_DIALOG - thisPort ? Bye /
+		logSipDialogInputEvent(message);
+	-> BYE_RECEIVED;
+		
+	// mid-dialog requests
+	//
+	transition INVITE_RECEIVED_EARLY_DIALOG - thisPort ? SipServletRequest -> INVITE_RECEIVED_EARLY_DIALOG;
+	transition INVITE_RECEIVED_EARLY_DIALOG - remote ? SipServletRequest   -> INVITE_RECEIVED_EARLY_DIALOG;
+
+	// a response to a different request --- ignore
+	//
+	transition INVITE_RECEIVED - remote?SipServletResponse 
+		[ !isResponseToInitialRequest(message) ]
+	-> INVITE_RECEIVED;
+	
+	transition INVITE_RECEIVED_EARLY_DIALOG - remote?SipServletResponse 
+		[ !isResponseToInitialRequest(message) ]
+	-> INVITE_RECEIVED_EARLY_DIALOG;
+	
+	// sent response to a mid-dialog request
+	//
+	transition INVITE_RECEIVED_EARLY_DIALOG - thisPort?SipServletResponse 
+	-> INVITE_RECEIVED_EARLY_DIALOG;	
+
+	// Invite sent by port
+	//
+	transition START - remote?Invite /
+		setPendingRequest(message)
+	-> INVITE_SENT;
+
+	// provisional response
+	//
+	transition INVITE_SENT - thisPort ? ProvisionalResponse 
+	[ isResponseToInitialRequest(message) && isDialogEstablishingMessage(message) ] 
+		-> INVITE_SENT_EARLY_DIALOG
+	else [ isResponseToInitialRequest(message) && !isDialogEstablishingMessage(message) ] 
+		-> INVITE_SENT;
+	
+	transition INVITE_SENT_EARLY_DIALOG - thisPort ? SipServletResponse 
+		[ isResponseToInitialRequest(message) ]
+	-> INVITE_SENT_EARLY_DIALOG;
+
+	// success response
+	//
+	transition INVITE_SENT - thisPort ? SuccessResponse 
+		[ isResponseToInitialRequest(message) ] / {
+		logSipDialogInputEvent(message);
+		isPendingAckOutput = true;
+	} -> CONFIRMED;
+	
+	transition INVITE_SENT_EARLY_DIALOG - thisPort ? SuccessResponse 
+		[ isResponseToInitialRequest(message) ] / {
+		logSipDialogInputEvent(message);
+		isPendingAckOutput = true;
+	} -> CONFIRMED;
+	
+	// mid-dialog requests
+	//
+	transition INVITE_SENT_EARLY_DIALOG - thisPort?SipServletRequest -> INVITE_SENT_EARLY_DIALOG;
+	transition INVITE_SENT_EARLY_DIALOG - remote?SipServletRequest   -> INVITE_SENT_EARLY_DIALOG;
+
+	// error response
+	//
+	transition INVITE_SENT - thisPort ? FinalResponse 
+		[ isResponseToInitialRequest(message) ] /
+		logSipDialogInputEvent(message);
+	-> END;
+	
+	transition INVITE_SENT_EARLY_DIALOG - thisPort ? FinalResponse 
+		[ isResponseToInitialRequest(message) ] /
+		logSipDialogInputEvent(message);
+	-> END;
+
+	// handle sent Cancel
+	//
+	transition INVITE_SENT - remote ? Cancel /
+		logSipDialogOutputEvent(message);
+	-> CANCEL_SENT;
+
+	transition INVITE_SENT_EARLY_DIALOG - remote ? Cancel /
+		logSipDialogOutputEvent(message);
+	-> CANCEL_SENT;
+	
+	// handle sent Bye (allowed per RFC 3261 sec. 15)
+	//
+	transition INVITE_SENT_EARLY_DIALOG - remote ? Bye /
+		logSipDialogOutputEvent(message);
+	-> BYE_SENT;
+
+	// If we get 487, then all done  (408 is possible too).
+	// In fact, any response is possible due to race condition where
+	// this side sends CANCEL and the UAS sends the response and the
+	// two messages cross. Therefore, accept all error final responses.
+	//
+	transition CANCEL_SENT - thisPort ? ErrorResponse 
+		[ isPendingResponse(message) ]
+	-> END;
+	
+	// handle 2xx received to Invite after Cancel sent (race condition)
+	// TODO : just transition to CONFIRMED and let TeardownFSM take care of things?
+	//
+	transition CANCEL_SENT - thisPort ? SuccessResponse
+		[ isPendingResponse(message) ] /
+		logSipDialogInputEvent(message);
+	-> CONFIRMED;
+
+	transition CANCEL_SENT - thisPort ? ProvisionalResponse
+		[ isPendingResponse(message) ]
+	-> CANCEL_SENT;
+
+	// a response to a different request --- ignore
+	//
+	transition INVITE_SENT - thisPort ? SipServletResponse 
+		[ !isResponseToInitialRequest(message) ]
+	-> INVITE_SENT;
+
+	transition INVITE_SENT_EARLY_DIALOG - thisPort ? SipServletResponse 
+		[ !isResponseToInitialRequest(message) ]
+	-> INVITE_SENT_EARLY_DIALOG;
+
+	// sent response to a mid-dialog request
+	//
+	transition INVITE_SENT_EARLY_DIALOG - remote ? SipServletResponse 
+	-> INVITE_SENT_EARLY_DIALOG;
+
+	// receives Ack
+	transition CONFIRMED - thisPort ? Ack / {
+		<*
+		if (isPendingAckInput) {
+			logSipDialogInputEvent(message);
+			isPendingAckInput = false;
+		}
+		*>
+	} -> CONFIRMED;
+
+	// sends Ack
+	transition CONFIRMED - remote ? Ack / {
+		<*
+		if (isPendingAckOutput) {
+			logSipDialogOutputEvent(message);
+			isPendingAckOutput = false;
+		}
+		*>
+	} -> CONFIRMED;
+
+	// No action on responses or non-Bye requests when confirmed
+	//
+	transition CONFIRMED - thisPort ? SipServletRequest  -> CONFIRMED;
+	transition CONFIRMED - remote   ? SipServletRequest  -> CONFIRMED;
+	transition CONFIRMED - thisPort ? SipServletResponse -> CONFIRMED;
+	transition CONFIRMED - remote   ? SipServletResponse -> CONFIRMED;
+
+	transition CONFIRMED - thisPort ? Bye / {
+		setPendingRequest(message);
+		logSipDialogInputEvent(message);
+	} -> BYE_RECEIVED;
+	
+	// BYE allowed from UAC in early dialog
+	//
+	transition INVITE_RECEIVED_EARLY_DIALOG - thisPort ? Bye / {
+		setPendingRequest(message);
+		logSipDialogInputEvent(message);
+	} -> BYE_RECEIVED;	
+
+	transition BYE_RECEIVED - remote ? SipServletResponse
+	[ isPendingResponse(message) ]
+		-> END
+	else
+        // This allows, e.g., error response to INVITE
+        //
+		-> BYE_RECEIVED;
+
+	transition BYE_RECEIVED - remote ? SipServletRequest -> BYE_RECEIVED;
+	transition BYE_RECEIVED - thisPort ? SipServletMessage -> BYE_RECEIVED;
+
+	// receives Ack
+	transition BYE_RECEIVED - thisPort ? Ack / {
+		<*
+		if (isPendingAckInput) {
+			logSipDialogInputEvent(message);
+			isPendingAckInput = false;
+		}
+		*>
+	} -> BYE_RECEIVED;
+
+	// sends Ack
+	transition BYE_RECEIVED - remote ? Ack / {
+		<*
+		if (isPendingAckOutput) {
+			logSipDialogOutputEvent(message);
+			isPendingAckOutput = false;
+		}
+		*>
+	} -> BYE_RECEIVED;
+
+	transition CONFIRMED - remote ? Bye / {
+		setPendingRequest(message);
+		logSipDialogOutputEvent(message);
+		thisPort.setByeSent(true);
+	} -> BYE_SENT;
+	
+	// BYE allowed from UAC in early dialog
+	//
+	transition INVITE_SENT_EARLY_DIALOG - remote ? Bye / {
+		setPendingRequest(message);
+		logSipDialogOutputEvent(message);
+		thisPort.setByeSent(true);
+	} -> BYE_SENT;
+
+	transition BYE_SENT - thisPort ? SipServletResponse 
+	[ isPendingResponse(message) ] 
+		-> END
+	else
+        // This allows, e.g., error response to INVITE
+        //
+		-> BYE_SENT;
+
+	transition BYE_SENT - thisPort ? SipServletRequest -> BYE_SENT;
+	transition BYE_SENT - remote   ? SipServletMessage -> BYE_SENT;
+
+	// receives Ack
+	transition BYE_SENT - thisPort ? Ack / {
+		<*
+		if (isPendingAckInput) {
+			logSipDialogInputEvent(message);
+			isPendingAckInput = false;
+		}
+		*>
+	} -> BYE_SENT;
+
+	// sends Ack
+	transition BYE_SENT - remote ? Ack / {
+		<*
+		if (isPendingAckOutput) {
+			logSipDialogOutputEvent(message);
+			isPendingAckOutput = false;
+		}
+		*>
+	} -> BYE_SENT;
+}

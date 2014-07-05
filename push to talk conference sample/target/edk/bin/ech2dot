@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+########################################################################
+#                                                                      #
+#               This software is part of the ECharts package           #
+#                  Copyright (c) 2006 AT&T Corp.                       #
+#                      and is licensed under the                       #
+#                  Common Public License, Version 1.0                  #
+#                            by AT&T Corp.                             #
+#                                                                      #
+########################################################################
+
+import ech2x
+
+def main():
+	ech2x.main('ech2dot', 'dot', '',
+			   ['label-formatter=', 'tooltip-formatter=', 'url-formatter='],
+"""
+Generates Graphviz .dot graph layout description files for ECharts .ech
+files.
+""",
+"""
+--label-formatter         Fully qualified Python class name to format dot labels
+--tooltip-formatter       Fully qualified Python class name to format dot tooltips
+--url-formatter           Fully qualified Python class name to format dot URLs
+""", [])
+
+main()

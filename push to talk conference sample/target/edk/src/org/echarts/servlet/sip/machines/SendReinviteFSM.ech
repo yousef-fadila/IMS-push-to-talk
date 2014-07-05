@@ -1,0 +1,114 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2007 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+// $Name:  $ $Id: SendReinviteFSM.ech,v 1.8 2007/04/13 17:49:12 venkita Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import javax.sdp.SessionDescription;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+
+/** Send a re-INVITE on given port and process response.
+ */
+public machine SendReinviteFSM  {
+<*
+	SipPort p;
+	SipServletRequest reinvite;
+
+	// make this public so a parent machine can access if desired
+	
+	public static final String SUCCESS_RESPONSE = "SendReinviteFSM_SUCCESS_RESPONSE";
+
+	private void setSuccessResponse(SuccessResponse resp) {
+		p.setAttribute(SUCCESS_RESPONSE, resp);
+	}
+
+	/** Retrieve 2xx response to re-INVITE
+	 */
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) p.getAttribute(SUCCESS_RESPONSE);
+	}
+*>
+
+	/** Send the specified re-INVITE on port p
+	 */
+	public SendReinviteFSM(SipPort p, SipServletRequest reinvite) { <*
+		this.p = p;
+		this.reinvite = reinvite;
+	*> }
+
+	/** Send a re-INVITE on port p with SDP from responseToMatch.
+	 */
+	public SendReinviteFSM(SipPort p, SipServletResponse responseToMatch) { <*
+		this.p = p;
+
+		reinvite = p.createRequest("INVITE");
+		if( responseToMatch.getContentLength() > 0 ) {
+			reinvite.setContent(responseToMatch.getContent(), responseToMatch.getContentType());
+		}
+	*> }
+
+	/** Send a re-INVITE on port p with the supplied SDP.
+	 */
+	public SendReinviteFSM(SipPort p, String sdpString) { <*
+		this.p = p;
+
+		reinvite = p.createRequest("INVITE");
+		if( sdpString != null && sdpString.length() > 0 ) {
+			reinvite.setContent(sdpString.getBytes(), "application/sdp");
+		}
+	*> }
+
+	/** Send a re-INVITE on port p with the supplied SessionDescription.
+	 */
+	public SendReinviteFSM(SipPort p, SessionDescription sdp) { <*
+		this.p = p;
+
+		reinvite = p.createRequest("INVITE");
+		if( sdp != null ) {
+			reinvite.setContent(sdp.toString().getBytes(), "application/sdp");
+		}
+	*> }
+
+	initial state SEND_REINVITE;
+	public state AWAIT_RESPONSE;
+	public state SUCCESS;
+	public state FAILURE;
+	public state SEND_ACK;
+	public state DONE;
+
+	/** Send re-INVITE
+	 */
+	transition SEND_REINVITE - / p ! reinvite -> AWAIT_RESPONSE;
+
+	/** Absorb any provisional response
+	 */
+	transition AWAIT_RESPONSE - p ? ProvisionalResponse 
+	-> AWAIT_RESPONSE;
+
+	/** Success : save successResponse and send ACK
+	 */
+	transition AWAIT_RESPONSE - p ? SuccessResponse / {
+		setSuccessResponse(message);
+	} -> SEND_ACK;
+
+	/** Send ACK for 2xx response
+     */
+	transition SEND_ACK - / p ! getSuccessResponse().createAck() -> SUCCESS;
+
+	transition SUCCESS --> DONE;
+
+	/** Failure : container sends ACK for this case
+	 */
+	transition AWAIT_RESPONSE - p ? FinalResponse -> FAILURE;
+
+	transition FAILURE --> DONE;
+}

@@ -1,0 +1,50 @@
+<assembly>
+  <!-- 
+    Assembly descriptor for a "fat" sar, which puts classes in WEB-INF/classes 
+    and dependency jars in WEB-INF/lib. Other files from src/main/webapp 
+    (e.g., sip.xml and web.xml) are copied to the sar.
+	-->
+
+  <id>fatsar</id>
+  <formats>
+    <format>sar</format>
+  </formats>
+
+
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+		<!-- Copy everything from src/main/webapp, except for READMEs -->
+    <fileSet>
+      <directory>src/testharness/webapp</directory>
+        <excludes>
+          <exclude>**/README.txt</exclude>
+         </excludes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+
+    <!-- 
+      Copy all classes generated from src/main and src/testharness. This will
+      also pick up src/test, which we don't need but which will hopefully
+      be harmless.
+     -->
+    <fileSet>
+      <directory>target/classes</directory>
+      <outputDirectory>/WEB-INF/classes/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>target/test-classes</directory>
+      <outputDirectory>/WEB-INF/classes/</outputDirectory>
+    </fileSet>
+  </fileSets>
+
+  <dependencySets>
+	<!-- Put dependencies in WEB-INF/lib, but don't unpack them -->
+    <dependencySet>
+      <outputDirectory>/WEB-INF/lib</outputDirectory>
+      <unpack>false</unpack>
+      <useProjectArtifact>false</useProjectArtifact>
+      <scope>runtime</scope>
+    </dependencySet>
+  </dependencySets>
+</assembly>
+

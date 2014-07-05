@@ -1,0 +1,182 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2008 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SipPortTeardownFSM.ech 2047 2012-01-20 13:23:50Z yotommy $;
+
+package org.echarts.servlet.sip;
+
+import java.util.List;
+import javax.servlet.sip.SipServletRequest;
+import javax.servlet.sip.SipServletResponse;
+import javax.servlet.sip.SipServletMessage;
+import org.echarts.servlet.sip.utilities.SipServletUtils;
+import org.echarts.servlet.sip.messages.*;
+
+/** FSM to tear down a SipPort based on its PortState.
+ */
+
+public machine SipPortTeardownFSM implements BoxMachine {
+<*
+	SipPort sipPort;
+	PortState portState;
+	boolean destroyAfterTeardown;
+	boolean isTerminated;
+	boolean byeSent;
+	
+	/**
+	   For BoxMachine interface.
+	*/
+	public final FeatureBox getBox() {
+		return sipPort.getBox();
+	}
+
+	// pending request is maintained by InviteDialogFSM, we only check it in
+	// this machine
+	//
+	SipServletRequest getPendingRequest() {
+		return (SipServletRequest) sipPort.getAttribute(InviteDialogFSM.PENDING_REQUEST);
+	}
+
+	boolean isPendingResponse(SipServletResponse resp) {
+		return SipServletUtils.compareSipServletRequests(getPendingRequest(), resp.getRequest());
+	}
+
+	boolean isInitialResponse(SipServletResponse resp) {
+		return SipServletUtils.compareSipServletRequests(sipPort.getInitialRequest(), resp.getRequest());
+	}
+*>
+	/** Machine to tear down a SipPort based on its current call state.
+	  * Will not destroy port after teardown.
+	  */
+	public SipPortTeardownFSM(SipPort sipPort) {
+		this.sipPort = sipPort;
+		portState = sipPort.getPortState();
+		destroyAfterTeardown = false;
+		isTerminated = sipPort.isTerminated();
+	}
+	
+	/** Machine to tear down a SipPort based on its current call state,
+	  * and optionally destroy port after teardown.
+	  */
+	public SipPortTeardownFSM(SipPort sipPort, boolean destroyAfterTeardown) {
+		this.sipPort = sipPort;
+		this.destroyAfterTeardown = destroyAfterTeardown;
+		portState = sipPort.getPortState();
+		isTerminated = sipPort.isTerminated();
+	}
+
+	public initial state START;
+
+	public state TEARDOWN;
+
+	public state WAIT_BYE_RESPONSE;
+
+	public state CANCEL_SENT;
+
+	public state END entry <* if(destroyAfterTeardown) sipPort.destroy() *>;
+	
+	public state TRY_TO_BYE;
+	
+	public state CHECK_BYE_SENT;
+
+	transition START - 
+		[ portState == PortState.END ]  -> END
+	else [ isTerminated ] -> TRY_TO_BYE
+	else -> TEARDOWN;
+
+	transition TEARDOWN - [ portState == PortState.START ] -> END;
+
+	transition TEARDOWN - [ portState == PortState.INVITE_RECEIVED || portState == PortState.INVITE_RECEIVED_EARLY_DIALOG ] /
+		sipPort ! sipPort.createResponse(503, sipPort.getInitialRequest())
+	-> END;
+
+	transition TEARDOWN - [ portState == PortState.INVITE_SENT || portState == PortState.INVITE_SENT_EARLY_DIALOG ] / {
+		sipPort ! sipPort.getInitialRequest().createCancel();
+	} -> CANCEL_SENT;
+
+	transition TEARDOWN - [ portState == PortState.CONFIRMED ] / {
+		sipPort ! sipPort.createRequest("BYE");
+	} -> WAIT_BYE_RESPONSE;
+	
+	transition TEARDOWN - [ portState == PortState.CANCEL_SENT ] 
+	-> CANCEL_SENT;
+
+	transition TEARDOWN - [ portState == PortState.BYE_SENT ]
+	-> WAIT_BYE_RESPONSE;
+
+	transition TEARDOWN - [ portState == PortState.BYE_RECEIVED ] / {
+        // Reply to any outstanding request with 487
+        // RFC 3261, section 15.1.2
+        <*
+        List<SipServletRequest> pendingIncomingRequests = sipPort.getPendingIncomingRequests();
+        for( SipServletRequest pendingIncomingRequest : pendingIncomingRequests ) {
+            if( !"BYE".equalsIgnoreCase(pendingIncomingRequest.getMethod()) ) {
+                sipPort.output(sipPort.createResponse(487, pendingIncomingRequest), this);
+            }
+        }
+        *>;
+		sipPort ! sipPort.createResponse(200, getPendingRequest());
+	} -> END;
+
+	// This will have priority over MidDialogTerminationResponse in 
+	// FeatureBoxTerminationHandler due to message-class priority rule.
+	//
+	transition WAIT_BYE_RESPONSE - sipPort?SipServletResponse 
+		[ isPendingResponse(message) ] 
+	-> END;
+	
+	/** Absorb any other SIP messages after sending BYE 
+	 */
+	transition WAIT_BYE_RESPONSE - sipPort?SipServletMessage
+	-> WAIT_BYE_RESPONSE;
+
+	/** Any final response received (except SuccessResponse)
+	 */
+	transition CANCEL_SENT 
+		- sipPort?FinalResponse [ isInitialResponse(message) ]
+	-> END;
+
+	transition CANCEL_SENT - sipPort?ProvisionalResponse [ !isInitialResponse(message) ] -> CANCEL_SENT;
+	
+	/** Absorb any other SIP messages after sending CANCEL 
+	 */
+	transition CANCEL_SENT - sipPort?SipServletMessage
+	-> CANCEL_SENT;
+
+	/** Handle race: after sending Cancel and waiting for 487, we get a 200 to the INVITE.
+	 */
+	transition CANCEL_SENT - sipPort?SuccessResponse [ isInitialResponse(message) ] / {
+		// send ACK and BYE, wait for BYE response
+		sipPort ! message.createAck();
+		sipPort ! sipPort.createRequest("BYE");
+	} -> WAIT_BYE_RESPONSE;
+	
+	/** Ensure that this machine eventually exits these states.
+	 * Allow > 32s, by which time the response *should* have been
+	 * received.
+	 */
+	transition WAIT_BYE_RESPONSE - delay(33000) -> END;
+	transition CANCEL_SENT       - delay(33000) -> END;
+	
+	transition TRY_TO_BYE - / <*
+		byeSent = false;
+		try {
+			SipServletRequest bye = sipPort.createRequest("BYE");
+			sipPort.output(bye, this);
+			byeSent = true;
+		} catch( Exception e ) {
+			putEvent(new WarnEvent("After MidCallTerminationResponse, could not create/send BYE on port" + sipPort.toString()));
+		}
+	*> -> CHECK_BYE_SENT;
+	
+	transition CHECK_BYE_SENT - 
+		[ byeSent ] -> WAIT_BYE_RESPONSE
+		else -> END;
+}

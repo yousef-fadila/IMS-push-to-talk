@@ -1,0 +1,262 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: CallFSM.ech,v 1.12 2007/07/09 14:16:43 venkita Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import java.util.Properties;
+import java.util.Enumeration;
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Places a new call on a fresh port.  This machine acts as user
+ * agent client (UAC) and sends an INVITE request.  If a success
+ * final response (2xx) is received, this machine sends ACK and
+ * transitions to SUCCESS state.  If a failure final response (>=300)
+ * is received, this machine transitions to FAILURE state.
+ */
+
+public machine CallFSM  {
+<*
+	// make these public so a parent machine can access if desired
+	//
+	public static final String EARLY_MEDIA_RESPONSE = "CallFSM_EARLY_MEDIA_RESPONSE";
+	public static final String FINAL_RESPONSE       = "CallFSM_FINAL_RESPONSE";
+
+	/** Port used to place call.
+	 */
+	private SipPort p;
+
+	private void setFinalResponse(FinalResponse resp) {
+		p.setAttribute(FINAL_RESPONSE, resp);
+	}
+
+	/** Get received final response.
+	 */
+	public FinalResponse getFinalResponse() {
+		return (FinalResponse) p.getAttribute(FINAL_RESPONSE);
+	}
+
+	private void setEarlyMediaResponse(ProvisionalResponse resp) {
+		p.setAttribute(EARLY_MEDIA_RESPONSE, resp);
+	}
+
+	/** Get early media response received (if any).
+	 *  May return null.
+	 */
+	public ProvisionalResponse getEarlyMediaResponse() {
+		return (ProvisionalResponse) p.getAttribute(EARLY_MEDIA_RESPONSE);
+	}
+
+	private boolean hasSDP(SipServletMessage m) {
+		return "application/sdp".equals(m.getContentType());
+	}
+*>
+
+	/** Place call from fromuri to ruri on port p with specified sdp, setting headers.  If sdp is null, INVITE has no message content.
+	 */
+	public CallFSM(SipPort p, URI fromuri, URI ruri, Object sdp, Properties headers) { <*
+		this.p = p;
+
+		SipServletRequest savedInvite = p.createInvite(fromuri, ruri);
+		if( sdp != null) {
+			if (sdp instanceof String ) {
+				// set content as byte array rather than String
+				savedInvite.setContent(((String)sdp).getBytes(), "application/sdp");
+			} else {
+				// trust that the caller knows what it is doing with class of sdp
+				savedInvite.setContent(sdp, "application/sdp");
+			} 
+		}
+
+		if( headers != null ) {
+			Enumeration e = headers.propertyNames();
+			while( e.hasMoreElements() ) {
+				String headerName = (String) e.nextElement();
+				savedInvite.setHeader(headerName, headers.getProperty(headerName));
+			}
+		}
+		p.bind(savedInvite);
+	*> }
+
+	/** Place call from fromAdress to toAddress on port p with specified sdp, setting headers.  If sdp is null, INVITE has no message content.
+	 */
+	public CallFSM(SipPort p, Address fromAddress, Address toAddress, Object sdp, Properties headers) { <*
+		this.p = p;
+
+		SipServletRequest savedInvite = p.createInvite(fromAddress, toAddress);
+
+		if( sdp != null) {
+			if (sdp instanceof String ) {
+				// set content as byte array rather than String
+				savedInvite.setContent(((String)sdp).getBytes(), "application/sdp");
+			} else {
+				// trust that the caller knows what it is doing with class of sdp
+				savedInvite.setContent(sdp, "application/sdp");
+			} 
+		}
+
+		if( headers != null ) {
+			Enumeration e = headers.propertyNames();
+			while( e.hasMoreElements() ) {
+				String headerName = (String) e.nextElement();
+				savedInvite.setHeader(headerName, headers.getProperty(headerName));
+			}
+		}
+		p.bind(savedInvite);
+	*> }
+
+
+	/** Place call from fromuri to ruri on port p with specified sdp.
+	 * If sdp is null, INVITE has no message content.
+	 */
+	public CallFSM(SipPort p, URI fromuri, URI ruri, Object sdp) { <*
+		this.p = p;
+
+		SipServletRequest savedInvite = p.createInvite(fromuri, ruri);
+		if( sdp != null) {
+			if (sdp instanceof String ) {
+				// set content as byte array rather than String
+				savedInvite.setContent(((String)sdp).getBytes(), "application/sdp");
+			} else {
+				// trust that the caller knows what it is doing with class of sdp
+				savedInvite.setContent(sdp, "application/sdp");
+			} 
+		}
+		p.bind(savedInvite);
+	*> }
+
+	/** Continue call with origInvite updated to go to ruri
+	 */
+	public CallFSM(SipPort p, SipServletRequest origInvite, URI ruri) { <*
+		this.p = p;
+
+		SipServletRequest savedInvite = p.createInvite(origInvite, new RequestURIRequestModifier(ruri));
+
+		p.bind(savedInvite);
+	*> }
+
+	/** Continue call with origInvite modified with request modifier
+	 */
+	public CallFSM(SipPort p, SipServletRequest origInvite, RequestModifier requestModifier) { <*
+		this.p = p;
+
+		SipServletRequest savedInvite = p.createInvite(origInvite, requestModifier);
+
+		p.bind(savedInvite);
+	*> }
+
+	/** Place call with INVITE already created on p
+	 */
+	public CallFSM(SipPort p) { <*
+		this.p = p;
+	*> }
+
+	/** Initial state
+	 */
+	public initial state INIT;
+
+	/** INVITE has been sent, awaiting a final response
+	 */
+	public state AWAIT_FINAL_RESPONSE;
+
+	/** 180 has been received
+	 */
+	public state RINGING;
+
+	/** Early media response has been received
+	 */
+	public state EARLY_MEDIA;
+
+	/** 2xx response has been received
+	 */
+	public state SUCCESS;
+
+	/** Non-2xx final response has been received
+	 */
+	public state FAILURE;
+
+	/** Send INVITE
+	 */
+	transition INIT - /
+		p ! p.getInitialRequest()
+	-> AWAIT_FINAL_RESPONSE;
+
+	/** If provisional response contains SDP, save earlyMediaResponse and
+	 *  move to early media state.  Otherwise ignore provisional response.
+	 */
+	transition AWAIT_FINAL_RESPONSE - p ? ProvisionalResponse [ hasSDP(message) ] /
+			setEarlyMediaResponse(message);
+		-> EARLY_MEDIA
+	else
+		-> AWAIT_FINAL_RESPONSE;
+
+	/** If a 180 message has no SDP, move to ringing state.
+	 */
+	transition AWAIT_FINAL_RESPONSE - p ? ProvisionalResponse180 [ !hasSDP(message) ]
+	-> RINGING;
+
+	/** Success : save finalResponse
+	 */
+	transition AWAIT_FINAL_RESPONSE - p ? SuccessResponse / {
+		setFinalResponse(message);
+	} -> SEND_ACK;
+
+	/** Need to send ACK for 2xx response.  If a parent machine
+	 *  wants to take over, it must send ACK.  The ACK can be
+	 *  created via getFinalResponse().createAck().
+	 */
+	public state SEND_ACK;
+
+	/** Send ACK for 2xx response
+	 */
+	transition SEND_ACK - / p ! getFinalResponse().createAck() -> SUCCESS;
+
+	/** Failure:  save finalResponse, container will send ACK
+	 */
+	transition AWAIT_FINAL_RESPONSE - p ? FinalResponse / {
+		setFinalResponse(message);
+	} -> FAILURE;
+
+	/** Ignore any provisional response
+	 */
+	transition EARLY_MEDIA - p ? ProvisionalResponse -> EARLY_MEDIA;
+
+	/** Success : save finalResponse
+	 */
+	transition EARLY_MEDIA - p ? SuccessResponse / {
+		setFinalResponse(message);
+	} -> SEND_ACK;
+
+	/** Failure:  save finalResponse, container will send ACK
+	 */
+	transition EARLY_MEDIA - p ? FinalResponse / {
+		setFinalResponse(message);
+	} -> FAILURE;
+
+	/** Ignore any provisional response
+	 */
+	transition RINGING - p ? ProvisionalResponse -> RINGING;
+
+	/** Success : save finalResponse
+	 */
+	transition RINGING - p ? SuccessResponse / {
+		setFinalResponse(message);
+	} -> SEND_ACK;
+
+	/** Failure:  save finalResponse, container will send ACK
+	 */
+	transition RINGING - p ? FinalResponse / {
+		setFinalResponse(message);
+	} -> FAILURE;
+}

@@ -1,0 +1,143 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2007 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.monitor.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+
+/**
+	Propagate requests and responses between ports.  Appropriate to use
+	once a call is connected (e.g., B2BUA.CONNECTED).  When BYE is
+	received, this FSM propagates it like any other request.  This
+	allows for end-to-end teardown in the case where the BYE or the
+	BYE response carries information that should be propagated.
+ */
+
+public machine TransparentFSM  {
+<*
+	static final String rcsid = "$Name:  $ $Id: TransparentFSM.ech 1790 2011-05-20 17:55:52Z yotommy $";
+	public static final String RECEIVED_BYE = "RECEIVED_BYE";
+	SipPort port1;
+	SipPort port2;
+
+	SipServletRequest req;
+	SipPort receiver;
+	SipPort sender;
+
+	int numOutstandingRequests = 0;
+	final static int MAX_OUTSTANDING_REQUESTS = 16;
+	
+	private void setReceivedBye(Bye bye) {
+		// pick a port to store this attribute
+		port1.setAttribute(RECEIVED_BYE, bye);
+	}
+	
+	/** Get BYE message received by this machine.  May be null.
+	 */
+	public Bye getReceivedBye() {
+		return (Bye) port1.getAttribute(RECEIVED_BYE);
+	}
+*>
+
+	public TransparentFSM(SipPort port1, SipPort port2) {
+		this.port1 = port1;
+		this.port2 = port2;
+	}
+
+	/** Concurrent dynamic state, one machine per request
+	 */
+	public initial state TRANSPARENT[MAX_OUTSTANDING_REQUESTS]: TransparentHandleRequestFSM(req, receiver, sender);
+
+	/** Terminal state
+	 */
+	public state END;
+
+	/** Spawn a new TRANSPARENT machine to handle request received on port1
+	 */
+	transition TRANSPARENT - port1 ? SipServletRequest [ numOutstandingRequests < MAX_OUTSTANDING_REQUESTS ] / {
+		req = message;
+		receiver = port1;
+		sender = port2;
+		++numOutstandingRequests;
+	} -> TRANSPARENT.NEW
+    else / {
+		putEvent(new WarnEvent(String.format("Rejected %s request on port %s because maximum number of requests were outstanding", message.getMethod(), port1.toString())));
+		port1 ! port1.createResponse(SipServletResponse.SC_SERVICE_UNAVAILABLE, message);
+	} -> TRANSPARENT.DEEP_HISTORY;
+
+	/** Spawn a new TRANSPARENT machine to handle request received on port2
+	 */
+	transition TRANSPARENT - port2 ? SipServletRequest [ numOutstandingRequests < MAX_OUTSTANDING_REQUESTS ] / {
+		req = message;
+		receiver = port2;
+		sender = port1;
+		++numOutstandingRequests;
+	} -> TRANSPARENT.NEW
+    else / {
+		putEvent(new WarnEvent(String.format("Rejected %s request on port %s because maximum number of requests were outstanding", message.getMethod(), port2.toString())));
+		port2 ! port2.createResponse(SipServletResponse.SC_SERVICE_UNAVAILABLE, message);
+	} -> TRANSPARENT.DEEP_HISTORY;
+
+    /** Handle orphaned provisional responses (by dropping them).  These could occur if
+     *  the provisional response arrives after the final response.  Such responses
+     *  received at the appropriate time will be handled by the appropriate nested machine,
+     *  because of the Source Coverage Rule (the nested machine has a more specific source state).
+     */
+    transition TRANSPARENT - port1 ? ProvisionalResponse -> TRANSPARENT.DEEP_HISTORY;
+    transition TRANSPARENT - port2 ? ProvisionalResponse -> TRANSPARENT.DEEP_HISTORY;
+
+    /** Handle any other orphaned responses (by dropping them).  These could occur if
+     *  a request is outstanding when a port is placed in a TransparentFSM with a 
+     *  a different port.  Log a warning about the occurrence.
+     */
+    transition TRANSPARENT - port1 ? SipServletResponse /
+        putEvent(new WarnEvent("TransparentFSM received response, but could not find outstanding request on port " + port1.toString()));
+    -> TRANSPARENT.DEEP_HISTORY;
+
+    transition TRANSPARENT - port2 ? SipServletResponse /
+        putEvent(new WarnEvent("TransparentFSM received response, but could not find outstanding request on port " + port2.toString()));
+    -> TRANSPARENT.DEEP_HISTORY;
+
+	// Note: Cannot use TRANSPARENT.TERMINAL -> ...
+	//       because of the special TRANSPARENT.END_BYE transition below.
+
+	/** A sub-machine completed, so clean it up.
+	 */
+	transition TRANSPARENT[?index].END_INVITE_SUCCESS - / {
+        TRANSPARENT.get(index).cleanup();
+        --numOutstandingRequests;
+    } -> TRANSPARENT.DEEP_HISTORY;
+
+	/** A sub-machine completed, so clean it up.
+	 */
+	transition TRANSPARENT[?index].END_INVITE_FAILURE - / {
+        TRANSPARENT.get(index).cleanup();
+        --numOutstandingRequests;
+    } -> TRANSPARENT.DEEP_HISTORY;
+
+	/** A sub-machine completed, so clean it up.
+	 */
+	transition TRANSPARENT[?index].END_OTHERS - / {
+        TRANSPARENT.get(index).cleanup();
+        --numOutstandingRequests;
+    } -> TRANSPARENT.DEEP_HISTORY;
+
+	<* int index = -1; *>
+	/** One sub-machine handled the complete BYE transaction on both ports,
+		so end.
+	 */
+	transition TRANSPARENT[?index].END_BYE - / {
+		setReceivedBye((Bye)TRANSPARENT.get(index).getIncomingRequest());
+        TRANSPARENT.get(index).cleanup();
+		--numOutstandingRequests;
+	} -> END;
+}

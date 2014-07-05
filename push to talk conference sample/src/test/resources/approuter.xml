@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- There must be exactly one sip-app-router section. -->
+
+<sip-app-router>
+	<!-- There may be zero or more display-name sections. -->
+	
+	<display-name>ConferenceSampleTest</display-name>
+	
+<!-- There may be zero or more precedence sections. -->
+<!--
+	<precedence>
+		<terminating-region>
+			<ordering>
+				<app-name>ConferenceSampleTest</app-name>
+			</ordering>
+		</terminating-region>
+	</precedence>
+  -->
+
+	<!--
+	There may be zero or more application-mapping sections.
+	However, the absence of a application-mapping section is not very useful
+	since it would mean that no application could ever be invoked.
+	-->
+
+	<application-mapping>
+		<terminating-region-mapping>
+			<mapping>
+				<address-pattern>sip:*.*</address-pattern>
+				<app-name>ConferenceSampleTest</app-name>
+			</mapping>
+		</terminating-region-mapping>
+	</application-mapping>
+
+</sip-app-router>

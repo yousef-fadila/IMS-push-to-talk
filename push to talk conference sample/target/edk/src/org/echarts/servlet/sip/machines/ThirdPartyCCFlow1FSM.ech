@@ -1,0 +1,271 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2008 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Id: ThirdPartyCCFlow1FSM.ech 1752 2011-02-14 21:16:28Z yotommy $
+
+package org.echarts.servlet.sip.machines;
+
+import java.util.Properties;
+import java.net.InetAddress;
+import java.util.Iterator;
+import javax.servlet.sip.*;
+import javax.servlet.ServletContext;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+
+/** Uses third-party call control to set up a call between two far parties.
+ *  See constructor for parameters.
+ *
+ * This fragment uses RFC 3725 Third Party Call Control (3pcc)
+ * call establishment flow I to establish a call between two
+ * parties.
+ * <pre>
+ *              A              Controller               B
+ *              |(1) INVITE no SDP  |                   |
+ *              |<------------------|                   |
+ *              |(2) 200 offer1     |                   |
+ *              |------------------>|                   |
+ *              |                   |(3) INVITE offer1  |
+ *              |                   |------------------>|
+ *              |                   |(4) 200 OK answer1 |
+ *              |                   |<------------------|
+ *              |                   |(5) ACK            |
+ *              |                   |------------------>|
+ *              |(6) ACK answer1    |                   |
+ *              |<------------------|                   |
+ *              |(7) RTP            |                   |
+ *              |.......................................|
+ * </pre>
+ */
+public machine ThirdPartyCCFlow1FSM  {
+<*
+	SipPort caller;
+	SipPort callee;
+	SipFactory factory;
+
+	SipURI party1, party2, from;
+	SipServletRequest  invite;
+	SipServletResponse response2;
+	SipServletResponse responseToMatch;
+	Object offer1;
+	int firstPartyTimeoutMsec;
+	String ourDomain;
+	String uid;
+	Properties headers;
+	Object answer1 = null;
+
+	String fromUserForCaller = null;
+	String fromUserForCallee = null;
+
+	boolean isEarlyMedia;
+
+	void copyParameters(SipURI a, SipURI b) {
+		Iterator iter = a.getParameterNames();
+		while( iter.hasNext() ) {
+			String paramName = (String) iter.next();
+			b.setParameter(paramName, a.getParameter(paramName));
+		}
+	}
+
+	SipURI createFromURI(String str) throws ServletParseException {
+		if( str != null ) {
+			if( str.startsWith("sip:") || str.startsWith("sips:") ) {
+				return ((SipURI) factory.createURI(str));
+			} else {
+				return factory.createSipURI(str, ourDomain);
+			}
+		} else {
+			return factory.createSipURI(null, ourDomain);
+		}
+	}
+*>
+
+	/** First calls callerSipURI on caller SipPort, then on success calls calleeSipURI on calleeSipPort.
+	 *
+	 * @param callerSipURI SIP URI of first party.  This will be the Request-URI of INVITE sent out on caller SipPort.
+	 * @param calleeSipURI SIP URI of second party.  This will be the Request-URI of INVITE sent out on callee SipPort.
+	 * @param firstPartyTimeoutMsec Wait for this duration for first party to answer before abandoning call (-1 means no timeout)
+	 * @param isEarlyMedia If true, early media on call to second party (i.e. SDP in provision response to the INVITE) causes ACK to be sent to first party.
+	 */
+	public ThirdPartyCCFlow1FSM(SipFactory factory, SipPort caller, SipPort callee, String callerSipURI, String calleeSipURI, int firstPartyTimeoutMsec, boolean isEarlyMedia, String uid) { <*
+
+		this.factory = factory;
+		this.caller = caller;
+		this.callee = callee;
+
+		party1 = (SipURI) factory.createURI(callerSipURI);
+		party2 = (SipURI) factory.createURI(calleeSipURI);
+
+		this.firstPartyTimeoutMsec = firstPartyTimeoutMsec;
+		this.isEarlyMedia = isEarlyMedia;
+		this.uid = uid;
+
+		// Since these are not specified, use the user portion
+		// of other party's SIP URI as the user part of the
+		// From address ("caller ID")
+		//
+		this.fromUserForCaller = party2.getUser();
+		this.fromUserForCallee = party1.getUser();
+		
+		ourDomain = InetAddress.getLocalHost().getHostName();
+		headers = new Properties();
+
+		from = createFromURI(fromUserForCaller);
+		copyParameters(party2, from);
+	*> }
+
+	/** First calls callerSipURI on caller SipPort, then on success calls calleeSipURI on calleeSipPort.
+	 *
+	 * @param callerSipURI SIP URI of first party.  This will be the Request-URI of INVITE sent out on caller SipPort.
+	 * @param fromUserForCaller From address sent to first party.  Can be used to affect Caller-ID.  Can be full SIP URI or just user part.
+	 * @param calleeSipURI SIP URI of second party.  This will be the Request-URI of INVITE sent out on callee SipPort.
+	 * @param fromUserForCallee From address sent to second party.  Can be used to affect Caller-ID.  Can be full SIP URI or just user part.
+	 * @param firstPartyTimeoutMsec Wait for this duration for first party to answer before abandoning call (-1 means no timeout)
+	 * @param isEarlyMedia If true, early media on call to second party (i.e. SDP in provision response to the INVITE) causes ACK to be sent to first party.
+	 */
+	public ThirdPartyCCFlow1FSM(SipFactory factory, SipPort caller, SipPort callee, String callerSipURI, String fromUserForCaller, String calleeSipURI, String fromUserForCallee, int firstPartyTimeoutMsec, boolean isEarlyMedia, String uid) { <*
+
+		this.factory = factory;
+		this.caller = caller;
+		this.callee = callee;
+
+		party1 = (SipURI) factory.createURI(callerSipURI);
+		party2 = (SipURI) factory.createURI(calleeSipURI);
+
+		ourDomain = InetAddress.getLocalHost().getHostName();
+
+		from = createFromURI(fromUserForCaller);
+
+		if( fromUserForCallee != null )
+			this.fromUserForCallee = fromUserForCallee;
+
+		this.firstPartyTimeoutMsec = firstPartyTimeoutMsec;
+		this.isEarlyMedia = isEarlyMedia;
+		this.uid = uid;
+		
+		headers = new Properties();
+
+		// TODO : does this make sense now that we are using
+		// fromUserForCalle2 instead of (necessarily) party2?
+		copyParameters(party2, from);
+	*> }
+
+	/** Place call to first party
+	 */
+	public initial state CALL_FIRST_PARTY : CallFSM(caller, from, party1, null);
+
+	/** Upon success response from first party, do not send ACK yet.
+	 *  Use the SDP from the final response to be used to call second party.
+	 */
+	transition CALL_FIRST_PARTY.SEND_ACK - / <*
+		response2 = CALL_FIRST_PARTY.getFinalResponse();
+		offer1 = response2.getContent();
+	
+		from = createFromURI(fromUserForCallee);
+		// TODO : does this make sense now that we are using
+		// fromUserForCallee instead of (necessarily) party1?
+		copyParameters(party1, from);
+		if( uid != null) headers.setProperty("X-ECHARTS-UID", uid);
+	*> -> CALL_SECOND_PARTY;
+
+	/** And-machine:
+	 *   CALLEE machine places call to second party (callee)
+	 *   CALLER machine sends Ack to caller based on callee response
+	 */
+	state CALL_SECOND_PARTY : concurrent {
+
+		state CALLEE : {
+			initial state CALL : CallFSM(callee, from, party2, offer1, headers);
+	
+			transition CALL.SUCCESS --> CONNECTED;
+			
+			state CONNECTED;
+		};
+
+		state CALLER : {
+			/** Start out idle, wait for parent to invoke transition.
+			 */
+			initial state IDLE;
+
+			/** Send ACK to caller based on callee response.
+			 */
+			state CONNECTED
+				entry {
+				<*
+					SipServletRequest ack = response2.createAck();
+					ack.setContent(answer1, "application/sdp");
+					caller.output(ack, this);
+				*>
+				};
+		};
+
+		/** Received early media from callee.  Save answer1.
+		 * If isEarlyMedia is true, then also send ACK to caller.
+		 * (Must use as specific source state in CALLEE to override
+		 *  the ProvisionalResponse handling.)
+		 */
+		transition [ CALLER.IDLE, CALLEE.CALL.EARLY_MEDIA ] - [ isEarlyMedia ] /
+			answer1 = CALLEE.CALL.getEarlyMediaResponse().getContent();
+		-> [ CALLER.CONNECTED, CALLEE.DEEP_HISTORY ]
+		else [ <* answer1 == null *> ] /
+			answer1 = CALLEE.CALL.getEarlyMediaResponse().getContent();
+		-> [ CALLER.DEEP_HISTORY, CALLEE.DEEP_HISTORY ];
+
+		/** Successful call to callee, send ACK to caller if IDLE
+		 * (Don't need to send ACK if already happened due to early media)
+		 * This transition overrides the one defined in CALL above.
+		 */
+		transition [ CALLER.IDLE, CALLEE.CALL.SUCCESS ] - /
+		<*
+			// If answer1 is not already received in early media before,
+			// then obtain answer1 from the final response.
+			if (answer1 == null) {
+				answer1 = CALLEE.CALL.getFinalResponse().getContent();
+			}
+		*>
+		-> [ CALLER.CONNECTED, CALLEE.CONNECTED ];
+
+		/** Prevent message queueing so that auto-termination will trigger
+		 * if caller sends BYE.  All other messages are absorbed.
+		 */
+		transition CALLER - caller ? Object -> CALLER.DEEP_HISTORY;
+	};
+
+	/** First and second calls successful.
+	 */
+	transition [ CALL_SECOND_PARTY.CALLER.CONNECTED, CALL_SECOND_PARTY.CALLEE.CONNECTED ] -
+	-> TRANSPARENT;
+
+	/** Steady state : transparent behavior between caller and callee
+	 */
+	public state TRANSPARENT : TransparentFSM(caller, callee);
+
+	/** End of steady state 
+	 */
+	transition TRANSPARENT.TERMINAL --> END;
+	
+	/** Simple end state 
+	 */
+	public state END;
+
+	// ERROR CONDITIONS
+
+	/** Terminate if first party does not answer before specified timeout
+	 */
+	transition CALL_FIRST_PARTY - delay( firstPartyTimeoutMsec ) -> END;
+
+	/** Terminate if call to first party is unsuccessful
+	 */
+	transition CALL_FIRST_PARTY.FAILURE --> END;
+
+	/** Terminate if call to second party is unsuccessful
+	 */
+	transition CALL_SECOND_PARTY.CALLEE.CALL.FAILURE --> END;
+}

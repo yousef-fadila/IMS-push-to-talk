@@ -1,0 +1,110 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006 AT&T Corp.                       *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import javax.servlet.*;
+import java.util.Properties;
+import javax.servlet.ServletContext;
+
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+import org.echarts.servlet.sip.machines.TransparentFSM;
+
+/** This fragment implements a Back-to-back User Agent, going through the
+ * following steps:
+ * <ul>
+ * <li>Starts from idle, i.e. no SIP calls.</li>
+ * <li>Receives INVITE on BoxPort of the box.</li>
+ * <li>If receives error final response on UAC side, terminates at FAILURE state.</li>
+ * <li>If receives CANCEL on UAS side before dialog is established, terminates at CANCELLED state.</li>
+ * <li>If SIP dialogs are successfully established, after both dialogs are terminated by BYE, terminates at END state.</li>
+ * </ul>
+ *
+ * Note that there are two protocol lavel race conditions related to
+ * the initial INVITE transactions and CANCEL.  See the underlying
+ * B2buaInviteFSM for details.<p>
+ *
+ * This machine uses optional RequestModifier object to change Request-URI
+ * for outgoing INVITE.<p>
+ *
+ * In ACTIVE state, INFO messages are passed transparently between
+ * caller and callee.
+ */
+
+public machine B2buaSafeFSM  {
+<*
+	final static String rcsid = "$Name:  $ $Id: B2buaSafeFSM.ech,v 1.7 2008/08/17 19:52:24 cheung Exp $";
+	
+	FeatureBox        box;
+	SipPort    caller;
+	SipPort    callee;
+	RequestModifier   reqModifier;
+
+	BoxPort    boxPort;
+
+	public Bye getReceivedBye() {
+		// Set in INITIAL_INVITE.ACTIVE
+		//
+		return (Bye) callee.getAttribute(B2buaInviteFSM.RECEIVED_BYE);
+	}
+*>
+
+	/** Used when this FSM is invoked by a parent FSM.
+	*/
+	public B2buaSafeFSM(FeatureBox box, SipPort caller, SipPort callee, RequestModifier reqModifier) {
+		this.box    = box;
+		this.caller = caller;
+		this.callee = callee;
+		this.reqModifier = reqModifier;
+
+		boxPort = box.getBoxPort();
+	}
+
+	/** Used when this FSM is specified as machineClassName by EChartsSipServlet
+	*/
+	public B2buaSafeFSM(FeatureBox box, Properties servletProps, ServletContext context) {
+		this.box    = box;
+		this.caller = box.createSipPort("caller");
+		this.callee = box.createSipPort("callee");
+		this.reqModifier   = box.getDefaultModifier();
+
+		boxPort = box.getBoxPort();
+	}
+
+	public initial state ACTIVE : concurrent {
+		public state INITIAL_INVITE : B2buaInviteFSM(box, caller, callee, reqModifier);
+		public state TRANSPARENT : TransparentFSM(caller, callee);
+	};
+
+	public state CANCELLED;
+	public state FAILURE;
+	public state END;
+
+	transition ACTIVE.INITIAL_INVITE.FAILURE -
+	-> FAILURE;
+
+	transition ACTIVE.INITIAL_INVITE.CANCELLED -
+	-> CANCELLED;
+
+	transition ACTIVE.INITIAL_INVITE.CALLEE_BYED -
+	-> END;
+
+	// A parent FSM can define transitions based on FAILURE or CANCELLED
+	// states, and can get access to failureResponse if desired
+	// (since it is public).
+	//
+	transition CANCELLED --> END;
+	transition FAILURE --> END;
+
+	transition ACTIVE.TRANSPARENT.END -
+	-> END;
+}

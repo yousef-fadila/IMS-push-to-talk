@@ -1,0 +1,190 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2007 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.sip.*;
+
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Propagate a SIP request from receiver to sender as a B2BUA.
+ * Wait for and propagate responses until a final response is received.
+ *
+ * A special case is ACK.  ACK is handled as part of INVITE handling, and
+ * should not be passed directly into this FSM.
+ */
+
+public machine TransparentHandleRequestFSM  {
+
+<*
+	final static String rcsid = "$Name:  $ $Id: TransparentHandleRequestFSM.ech 1828 2011-09-21 19:43:06Z eshc $";
+	
+	// With concurrent machines, these can stomp on each other, so we
+	//        make attribute names unique by appending machine hashcode
+	//
+	public static final String INCOMING_REQUEST_ATTR_PREFIX = "INCOMING_REQUEST_";
+	public static final String OUTGOING_REQUEST_ATTR_PREFIX = "OUTGOING_REQUEST_";
+	public static final String SUCCESS_RESPONSE_ATTR_PREFIX = "SUCCESS_RESPONSE_";
+
+    private String incomingRequestAttrName;
+    private String outgoingRequestAttrName;
+    private String successResponseAttrName;
+
+	private int machineHashcode;
+	
+	SipPort receiver;
+	SipPort sender;
+
+	SipServletRequest outgoingRequest;
+	
+	private void setIncomingRequest(SipServletRequest req) {
+		receiver.setAttribute(incomingRequestAttrName, req);
+	}
+	
+	/** Get the incoming request that started this transaction.
+	 */
+	public SipServletRequest getIncomingRequest() {
+		return (SipServletRequest) receiver.getAttribute(incomingRequestAttrName);
+	}
+	
+	private void setOutgoingRequest(SipServletRequest req) {
+		sender.setAttribute(outgoingRequestAttrName, req);
+	}
+	
+	/** Get the outgoing request sent by this Machine.
+	 */
+	public SipServletRequest getOutgoingRequest() {
+		return (SipServletRequest) sender.getAttribute(outgoingRequestAttrName);
+	}
+
+	private void setSuccessResponse(SipServletResponse resp) {
+		sender.setAttribute(successResponseAttrName, resp);
+	}
+	
+	/** Get received success response to outgoing request.  May be null.
+	 */
+	public SipServletResponse getSuccessResponse() {
+		return (SipServletResponse) sender.getAttribute(successResponseAttrName);
+	}
+
+    public void cleanup() {
+        receiver.removeAttribute(incomingRequestAttrName);
+        sender.removeAttribute(outgoingRequestAttrName);
+        sender.removeAttribute(successResponseAttrName);
+    }
+	
+*>
+	public TransparentHandleRequestFSM(SipServletRequest incomingRequest, SipPort receiver, SipPort sender) {
+		this.receiver        = receiver;
+		this.sender          = sender;
+		this.machineHashcode = this.hashCode();
+
+        incomingRequestAttrName = INCOMING_REQUEST_ATTR_PREFIX + this.machineHashcode;
+        outgoingRequestAttrName = OUTGOING_REQUEST_ATTR_PREFIX + this.machineHashcode;
+        successResponseAttrName = SUCCESS_RESPONSE_ATTR_PREFIX + this.machineHashcode;
+
+		setIncomingRequest(incomingRequest);
+	}
+
+	initial state INIT;
+	state REQUEST_RELAYED;
+	state WAIT_FOR_ACK;
+	// INVITE transaction ended with success 2xx final response
+	public state END_INVITE_SUCCESS;
+	// INVITE transaction ended with 3xx or higher final response
+	public state END_INVITE_FAILURE;
+	// BYE transaction ended with final response
+	public state END_BYE;
+	// All other case
+	public state END_OTHERS;
+
+	// Propagate request to sender
+	//
+	transition INIT - [ ! getIncomingRequest().getMethod().equals("ACK") ] / {
+			sender! (outgoingRequest = sender.createRequest(getIncomingRequest()));
+			// save requests as attributes
+			setOutgoingRequest(outgoingRequest);
+		} -> REQUEST_RELAYED
+	else /
+			// Do not expect to receive ACK
+			//
+			putEvent(new InfoEvent("WARNING - Unexpected ACK"))
+		-> END_OTHERS;
+
+	// Relay provisional response
+	//
+	transition REQUEST_RELAYED - sender?ProvisionalResponse
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		receiver!receiver.createResponse(message, getIncomingRequest())
+	-> REQUEST_RELAYED;
+
+	// Received 200 response to INVITE request - need to handle ACK
+	transition REQUEST_RELAYED - sender?InviteSuccessResponse200
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		{
+			setSuccessResponse(message);
+			receiver!receiver.createResponse(message, getIncomingRequest());
+		}
+	-> WAIT_FOR_ACK;
+
+	transition WAIT_FOR_ACK - receiver?Ack /
+		{
+			<*
+				SipServletRequest ackMsg = getSuccessResponse().createAck();
+				//
+				// Copy headers
+				sender.copyRequestHeaders(message, ackMsg);
+
+				// Copy message body
+				if( message.getContentLength() > 0 ) {
+					ackMsg.setContent(message.getContent(), message.getContentType());
+				}
+			*>;
+			sender!ackMsg;
+		}
+	-> END_INVITE_SUCCESS;
+
+	// Received final error response (state >= 400) to INVITE request
+	transition REQUEST_RELAYED - sender?InviteErrorResponse
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		receiver!receiver.createResponse(message, getIncomingRequest())
+	-> END_INVITE_FAILURE;
+
+	// Received redirection (3xx) response to INVITE request
+	// Redirect not supported, just treat as failure as above.
+	//
+	transition REQUEST_RELAYED - sender?RedirectResponse
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		receiver!receiver.createResponse(message, getIncomingRequest())
+	-> END_INVITE_FAILURE;
+	
+	// Received final response to BYE
+	//
+	transition REQUEST_RELAYED - sender?ByeResponse
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		receiver!receiver.createResponse(message, getIncomingRequest())
+	-> END_BYE;
+
+	// Received final response to requests other than INVITE or BYE
+	//
+	// Note that this transition would not fire upon receipt of a response to INVITE or BYE,
+	// because InviteSuccessResponse200, InviteErrorResponse, RedirectResponse,
+	// and ByeResponse are more specific than FinalResponse, therefore the transitions above
+	// has priority over this one.
+	//
+	transition REQUEST_RELAYED - sender?FinalResponse
+		[ SipServletUtils.compareSipServletRequests(getOutgoingRequest(), message.getRequest()) ] /
+		receiver!receiver.createResponse(message, getIncomingRequest())
+	-> END_OTHERS;
+}

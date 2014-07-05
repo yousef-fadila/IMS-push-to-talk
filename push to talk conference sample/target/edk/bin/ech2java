@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+########################################################################
+#                                                                      #
+#               This software is part of the ECharts package           #
+#                  Copyright (c) 2006 AT&T Corp.                       #
+#                      and is licensed under the                       #
+#                  Common Public License, Version 1.0                  #
+#                            by AT&T Corp.                             #
+#                                                                      #
+########################################################################
+
+import ech2x
+
+def main():
+	ech2x.main('ech2java', 'java', '', [],
+"""
+Generates Java files class files from ECharts .ech files utilizing
+Java as their host language.
+""",
+			   '', [])
+
+main()

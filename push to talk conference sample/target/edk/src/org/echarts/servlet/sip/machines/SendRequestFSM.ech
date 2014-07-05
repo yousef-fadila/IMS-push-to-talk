@@ -1,0 +1,71 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SendRequestFSM.ech,v 1.5 2008/04/18 14:32:46 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Send a request and wait for the response.
+ *  Indicates SUCCESS or FAILURE.
+ */
+public machine SendRequestFSM {
+<*
+	SipPort p;
+	SipServletRequest req;
+	
+	// These can stomp on each other, so we
+	//        make attribute names unique by appending machine hashcode
+	//
+	private static final String SEND_REQUEST_ATTR = "SEND_REQUEST_";
+		
+	private int machineHashcode;
+	
+	private void setFinalResponse(FinalResponse r) {
+		p.setAttribute(SEND_REQUEST_ATTR + machineHashcode, r);
+	}
+	public FinalResponse getFinalResponse() {
+		return (FinalResponse) p.getAttribute(SEND_REQUEST_ATTR + machineHashcode);
+	}
+*>
+
+	public SendRequestFSM(SipPort p, SipServletRequest req) {
+		this.p = p;
+		this.req = req;
+		this.machineHashcode = this.hashCode();
+	}
+
+	initial state SEND_REQUEST;
+	state AWAIT_RESPONSE;
+	public state SUCCESS;
+	public state FAILURE;
+
+	transition SEND_REQUEST - /
+		p ! req
+	-> AWAIT_RESPONSE;
+
+	transition AWAIT_RESPONSE 
+		- p ? ProvisionalResponse [ SipServletUtils.compareSipServletRequests(req, message.getRequest()) ]
+	-> AWAIT_RESPONSE;
+
+	transition AWAIT_RESPONSE 
+		- p ? SuccessResponse [ SipServletUtils.compareSipServletRequests(req, message.getRequest()) ] /
+		setFinalResponse(message);
+	-> SUCCESS;
+
+	transition AWAIT_RESPONSE 
+		- p ? FinalResponse [ SipServletUtils.compareSipServletRequests(req, message.getRequest()) ] /
+		setFinalResponse(message);
+	-> FAILURE;
+}

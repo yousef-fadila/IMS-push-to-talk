@@ -1,0 +1,151 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: HoldSwitchNewFSM.ech,v 1.4 2008/04/18 14:32:46 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Places oldCall on hold, while switching common port to newCall
+ * (which is not yet in a call).
+ *
+ * <ol>
+ * <li>Places oldCall on hold</li>
+ * <li>Places call to newCall</li>
+ * <li>Upon success response from newCall, sends re-INVITE to common</li>
+ * </ol>
+ */
+
+public machine HoldSwitchNewFSM {
+<*
+	SipPort common;
+	SipPort oldCall;
+	SipPort newCall;
+
+	SipServletRequest newInvite;
+	
+	private final static String SESSION_PROGRESS_RESPONSE = "SESSION_PROGRESS_RESPONSE";
+	private final static String SUCCESS_RESPONSE = "SUCCESS_RESPONSE";
+	private final static String FAILURE_RESPONSE = "FAILURE_RESPONSE";
+	
+	private void setSessionProgressResponse(ProvisionalResponse183 r) {
+		newCall.setAttribute(SESSION_PROGRESS_RESPONSE, r);
+	}
+	
+	public ProvisionalResponse183 getSessionProgressResponse() {
+		return (ProvisionalResponse183) newCall.getAttribute(SESSION_PROGRESS_RESPONSE);
+	}
+	
+	private void setSuccessResponse(SuccessResponse r) {
+		newCall.setAttribute(SUCCESS_RESPONSE, r);
+	}
+	
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) newCall.getAttribute(SUCCESS_RESPONSE);
+	}
+
+	private void setFailureResponse(FinalResponse r) {
+		newCall.setAttribute(FAILURE_RESPONSE, r);
+	}
+	
+	public FinalResponse getFailureResponse() {
+		return (FinalResponse) newCall.getAttribute(FAILURE_RESPONSE);
+	}
+*>
+
+	public HoldSwitchNewFSM(SipPort common, SipPort oldCall, SipPort newCall) {
+		this.common  = common;
+		this.oldCall = oldCall;
+		this.newCall = newCall;
+
+		newInvite = newCall.getInitialRequest();
+	}
+
+	public initial state CALLS : concurrent {
+		state HOLD_OLD_CALL : HoldFSM(oldCall);
+
+		public state PLACE_NEW_CALL : {
+			public initial state INIT;
+			public state WAIT_RESPONSE;
+			public state COMMON_REINVITE : SendReinviteFSM(common, getSessionProgressResponse());
+			public nonterminal state CONNECTED;
+			public state FAILURE;
+
+			transition INIT - / 
+				newCall!newInvite
+			-> WAIT_RESPONSE;
+
+			/** 183 => re-INVITE common
+			 */
+			transition WAIT_RESPONSE - newCall?ProvisionalResponse183 /
+				setSessionProgressResponse(message);
+			-> COMMON_REINVITE;
+
+			/** absorb all other provisional responses except 183
+			 * (will be overridden for 180 at parent level)
+			 */
+			transition WAIT_RESPONSE - newCall?ProvisionalResponse 
+			-> WAIT_RESPONSE;
+
+			transition COMMON_REINVITE.SUCCESS --> WAIT_RESPONSE;
+
+			transition WAIT_RESPONSE - newCall?SuccessResponse / {
+				setSuccessResponse(message);
+				newCall!message.createAck();
+			} -> CONNECTED;
+
+			// handle error response from newCall
+			transition WAIT_RESPONSE - newCall?FinalResponse /
+				setFailureResponse(message);
+			-> FAILURE;
+		};
+	};
+
+	// TODO : if common was already re-INVITEd in PLACE_NEW_CALL,
+	// there is no need to do so again
+	//
+	state COMMON_REINVITE : SendReinviteFSM(common, getSuccessResponse());
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+
+	/** oldCall is on hold, newCall is connected, no outstanding ringback request
+	 */
+	transition [ 
+		CALLS.HOLD_OLD_CALL.SUCCESS, 
+		CALLS.PLACE_NEW_CALL.CONNECTED
+	] --> COMMON_REINVITE;
+
+	transition COMMON_REINVITE.SUCCESS --> SUCCESS;
+
+	transition COMMON_REINVITE.FAILURE --> FAILURE;
+
+	/** Prevent message queuing so auto-termination will apply --- just drop on the floor
+	 */
+	transition CALLS - common?Object -> CALLS.DEEP_HISTORY;
+
+	/** oldCall is in terminal state, but newCall failed
+	 */
+	transition [ CALLS.HOLD_OLD_CALL.TERMINAL, CALLS.PLACE_NEW_CALL.FAILURE ] --> FAILURE;
+
+	/** failed to hold oldCall
+	 */
+	transition [ CALLS.HOLD_OLD_CALL.FAILURE, CALLS.PLACE_NEW_CALL.TERMINAL ] --> FAILURE;
+
+    /** Discard late provisional response.
+     */
+    transition COMMON_REINVITE - newCall ? ProvisionalResponse -> COMMON_REINVITE.DEEP_HISTORY;
+}

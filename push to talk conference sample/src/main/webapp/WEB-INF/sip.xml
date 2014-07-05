@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sip-app xmlns="http://www.jcp.org/xml/ns/sipservlet" xmlns:javaee="http://java.sun.com/xml/ns/javaee">
+
+    <javaee:display-name>ConferenceSample</javaee:display-name>
+
+    <app-name>ConferenceSample</app-name>
+
+    <servlet>
+        <javaee:servlet-name>ConferenceSample</javaee:servlet-name>
+        <javaee:servlet-class>att.com.ConferenceSample.ConferenceSampleSipServlet</javaee:servlet-class>
+        <javaee:init-param>
+            <javaee:param-name>machineClassName</javaee:param-name>
+            <javaee:param-value>att.com.ConferenceSample.ConferenceSampleMachine</javaee:param-value>
+        </javaee:init-param>
+        <!--
+        <javaee:init-param>
+            <javaee:param-name>sipToJavaClassName</javaee:param-name>
+            <javaee:param-value>att.com.ConferenceSample.ConferenceSampleMachineToJavaImpl</javaee:param-value>
+        </javaee:init-param>
+        -->
+        <javaee:load-on-startup>1</javaee:load-on-startup>
+    </servlet>
+
+    <servlet-selection>
+        <servlet-mapping>
+            <servlet-name>ConferenceSample</servlet-name>
+            <pattern>
+                <equal>
+                    <var>request.method</var>
+                    <value>INVITE</value>
+                </equal>
+            </pattern>
+        </servlet-mapping>
+    </servlet-selection>
+
+    <!-- used to implement delay() transitions -->
+    <listener>
+        <javaee:listener-class>org.echarts.servlet.sip.TransitionTimerManager</javaee:listener-class>
+    </listener>
+
+    <!-- used to renew SipApplicationSessions -->
+    <listener>
+        <javaee:listener-class>org.echarts.servlet.sip.EChartsSipServlet</javaee:listener-class>
+    </listener>
+
+    <session-config>
+        <!-- Container should not time out app sessions, as application
+             will invalidate sessions once they are complete.
+          -->
+    <javaee:session-timeout>0</javaee:session-timeout>
+    </session-config>
+
+</sip-app>

@@ -1,0 +1,134 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SwitchToNewFSM.ech,v 1.2 2008/01/23 14:24:03 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import java.util.Properties;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.Properties;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.sip.*;
+import javax.servlet.ServletContext;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.utilities.*;
+import org.echarts.servlet.sip.machines.*;
+
+/** Starting with connectedPort which is already connected to a different party,
+ * and newPort which is unconnected, this fragment connects these two ports.
+ * <p>
+ * The behavior of this fragment is:
+ * <ul>
+ * <li>Sends INVITE on newPort with no SDP to solicit an SDP offer.</li>
+ * <li>Upon receipt of 200 OK with SDP offer from newPort, sends re-INVITE on connectedPort.</li>
+ * <li>Upon receipt of 200 OK with SDP answer from connectedPort, sends ACK with SDP on newPort. (Also sends ACK on connectedPort)</li>
+ * </ul>
+ */
+public machine SwitchToNewFSM  {
+<*
+	private SipPort connectedPort;
+	private SipPort newPort;
+	private URI fromUri;
+	private URI requestUri;
+	private Properties headers;
+	private SipServletResponse responseToMatch;
+	private Object sdp;
+
+*>
+    public SwitchToNewFSM(SipPort connectedPort, SipPort newPort, URI fromUri, URI requestUri, Properties headers) {
+		this.connectedPort = connectedPort;
+		this.newPort = newPort;
+		this.fromUri = fromUri;
+		this.requestUri = requestUri;
+		this.headers = headers;
+    }
+
+	initial state CALLS : concurrent {
+		state NEW_CALL : {
+			initial state CALL : CallFSM(newPort, fromUri, requestUri, null, headers);
+
+			state WAIT_FOR_CONNECTED_REINVITE;
+
+			state CONNECTED;
+		}
+
+		state CONNECTED_CALL : {
+			/** Start out idle, wait for parent to invoke transition.
+			 */
+			initial state IDLE;
+
+			/** Send re-INVITE to connectedPort based on newPort response.
+			 */
+			state REINVITE : SendReinviteFSM(connectedPort, responseToMatch);
+
+			/** Successful re-INVITE completed
+			 */
+			transition REINVITE.SUCCESS - / <*
+				sdp = REINVITE.getSuccessResponse().getContent();
+			*> -> REINVITED;
+
+			/** Successful re-INVITE completed
+			 */
+			// nonterminal is required to prevent DEEP_HISTORY transition from recreating the
+			//  machine and going to its initial state (since REINVITED would be terminal
+			//  otherwise).
+			//
+			nonterminal state REINVITED;
+
+			// TODO : handle REINVITE.FAILURE --- what is the desired behavior?
+		};
+
+		/** If we get early media from newPort, re-INVITE connectedPort (if desired).
+		 */
+		transition [ CONNECTED_CALL.IDLE, NEW_CALL.CALL.EARLY_MEDIA ] - /
+			responseToMatch = NEW_CALL.CALL.getEarlyMediaResponse();
+		-> [ CONNECTED_CALL.REINVITE, NEW_CALL.DEEP_HISTORY ];
+
+		/** Successful call to newPort, so re-INVITE connectedPort if IDLE
+         * (Don't need to re-INVITE if already happened due to early media)
+         * This transition overrides the one defined above.
+         *
+         * N.B. We do not transition to CALLEE.DEEP_HISTORY because that would
+         * cause machine to be re-entered at initial state (because this
+         * transition destroys machine in terminal state).
+         */
+        transition [ CONNECTED_CALL.IDLE, NEW_CALL.CALL.SEND_ACK ] - /
+            responseToMatch = NEW_CALL.CALL.getFinalResponse();
+        -> [ CONNECTED_CALL.REINVITE, NEW_CALL.WAIT_FOR_CONNECTED_REINVITE ];
+
+		transition [ CONNECTED_CALL.REINVITED, NEW_CALL.WAIT_FOR_CONNECTED_REINVITE ] - / {
+		<*
+			SipServletRequest ack = NEW_CALL.CALL.getFinalResponse().createAck();
+			ack.setContent(sdp, "application/sdp");
+			newPort.output(ack, this);
+		*>
+		} -> [ CONNECTED_CALL.DEEP_HISTORY, NEW_CALL.CONNECTED];
+
+		/** Prevent message queueing so that auto-termination will trigger
+		 * if connectedPort sends BYE.  All other messages are absorbed.
+		 */
+		transition CONNECTED_CALL - connectedPort ? Object -> CONNECTED_CALL.DEEP_HISTORY;
+	};
+
+	public state SUCCESS;
+
+	transition [ CALLS.CONNECTED_CALL.REINVITED, CALLS.NEW_CALL.CONNECTED ] -
+    -> SUCCESS;
+
+	public state FAILURE;
+
+	transition CALLS.NEW_CALL.CALL.FAILURE --> FAILURE;
+}

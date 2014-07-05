@@ -1,0 +1,128 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2007 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.sip.*;
+
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+
+/** Send a PRACK for a received Reliable Provisional Response  
+ * Wait for and propagate responses until a final response is received.
+ *
+ */
+
+public machine HandlePrackFSM  {
+
+<*
+	final static String rcsid = "$Name:  $ $Id: HandlePrackFSM 1828 2011-09-21 19:43:06Z prakash $";
+
+	public static final String INCOMING_RESPONSE_ATTR_PREFIX = "INCOMING_PROVISIONAL_RESPONSE_" ;
+	public static final String OUTGOING_PRACK_ATTR_PREFIX = "OUTGOING_PRACK_REQUEST_" ;	
+
+	private String incomingProvisionalResponseAttrName;
+	private String outgoingPrackRequestAttrName;	
+
+	private int machineHashcode;
+
+	SipPort caller;
+	SipPort callee;
+
+	/**
+	*	Store an outgoing ReliableProvisional Response so a PRACK message can be created	
+	*/
+	public void setReliableProvisionalResponse(ReliableProvisionalResponse r) {
+		callee.setAttribute(incomingProvisionalResponseAttrName,r);
+	}
+
+	/**
+	*	Retrieve the stored ReliableProvisionalResponse to create a PRACK message
+	*/
+	public ReliableProvisionalResponse getReliableProvisionalResponse() {
+		return (ReliableProvisionalResponse) callee.getAttribute(incomingProvisionalResponseAttrName);	
+	}
+
+	/**
+	*	Store an outgoing PRACK request that is pending a response.
+	*	@param prackReq The request to store. If null, clear the storage.
+	*/
+	private void setPendingPrackRequest(SipServletRequest prackReq) {
+		if (prackReq != null) {
+			caller.setAttribute(outgoingPrackRequestAttrName, prackReq);	
+		} else {
+			caller.removeAttribute(outgoingPrackRequestAttrName);
+		}
+	}
+
+	/**
+	*	Retrieve a previously stored outgoing PRACK request that is pending a response. May be null.
+	*/
+	public SipServletRequest getPendingPrackRequest() {
+		return (SipServletRequest) caller.getAttribute(outgoingPrackRequestAttrName);
+	}
+
+	public void cleanup() {
+		caller.removeAttribute(outgoingPrackRequestAttrName);
+		callee.removeAttribute(incomingProvisionalResponseAttrName);
+	}
+	
+*>
+	public HandlePrackFSM(ReliableProvisionalResponse reliableResponse, SipPort caller, SipPort callee) {
+
+		this.caller = caller;
+		this.callee = callee;
+		this.machineHashcode = this.hashCode();
+
+		incomingProvisionalResponseAttrName = INCOMING_RESPONSE_ATTR_PREFIX + this.machineHashcode;
+		outgoingPrackRequestAttrName = OUTGOING_PRACK_ATTR_PREFIX + this.machineHashcode;
+
+		setReliableProvisionalResponse(reliableResponse);
+	}
+
+	initial state INIT;
+	private state AWAIT_PRACK_RESPONSE;
+	state SUCCESS;
+	state DISCONNECTED;
+
+	/**	Wait to get a PRACK from the caller, then generate the outbound PRACK to
+	*	to callee based on Reliable Provisional Response
+	*/
+	transition INIT - caller ? Prack / {
+		<*
+			SipServletRequest prackRequest = getReliableProvisionalResponse().createPrack();
+			callee.copyRequestHeaders(message, prackRequest);
+			if (message.getContentLength() > 0) {
+				prackRequest.setContent(message.getContent(), message.getContentType());
+			}
+			setPendingPrackRequest(message);
+		*>
+		callee ! prackRequest;
+	} -> AWAIT_PRACK_RESPONSE;
+
+	/**	Forward the success response for PRACK
+	*/
+	transition AWAIT_PRACK_RESPONSE - callee ? PrackSuccessResponse / {
+		caller!caller.createResponse(message, getPendingPrackRequest());
+	} -> SUCCESS;
+
+	/**	Go back to processing a new PRACK if callee sends a PRACK error response
+	*/
+	transition AWAIT_PRACK_RESPONSE - callee ? PrackErrorResponse / {
+		caller!caller.createResponse(message, getPendingPrackRequest());
+		<*
+			caller.removeAttribute(outgoingPrackRequestAttrName);
+		*>	
+	} -> INIT;
+
+}

@@ -1,0 +1,539 @@
+#!/usr/bin/env python
+
+########################################################################
+#                                                                      #
+#               This software is part of the ECharts package           #
+#                  Copyright (c) 2006 AT&T Corp.                       #
+#                      and is licensed under the                       #
+#                  Common Public License, Version 1.0                  #
+#                            by AT&T Corp.                             #
+#                                                                      #
+########################################################################
+
+# Creates documentation for specified machines suitable for browsing
+# with a web browser a la javadoc.
+
+import string, os, os.path, sys, shutil
+
+import ech2x
+
+binPath = os.path.dirname(os.path.abspath(sys.argv[0]))
+translatorPath = os.path.dirname(binPath)
+libPath = translatorPath + os.sep + "lib"
+docmachinePath = libPath + os.sep + "docmachine"
+imagesPath = docmachinePath + os.sep + "images"
+
+sys.path.append(libPath)
+import AbstractMachine
+
+def main():
+	ech2xargs = ['ech2doc', 'svg', 'docmachine', 
+						  ["dot-path=", "window-title=", "overview=", "document-title=", \
+						   "svg-only", "header=", "footer=", "svg-fontsize="],
+"""
+Generates documentation for ECharts .ech files regardless of the
+ECharts machine host language.  Outputs a javadoc-style website
+including SVG diagrams of ECharts machines. Use 'ech2javadoc' for
+generating documentation customized for Java host language machines.
+Note that Graphviz 'dot' must be installed to run this command.
+""",
+"""
+--dot-path               'dot' program file path
+--document-title         Documentation title HTML
+--window-title           Browser window title
+--overview               Path to documentation overview file
+--header                 Documentation header HTML
+--footer                 Documentation footer HTML
+--svg-only               Only generate browsable SVG documents
+--svg-fontsize           Fontsize for SVG documents
+""",
+["package-subdirectory"]]
+	# pre-process command line args before handing over control to
+	# ech2x
+	apply(ech2x.processCommandLine, ech2xargs)
+	if sys.platform == "win32":
+		dotpath = ech2x.getWin32CommandPath("dot")
+	else:
+		dotpath = "dot"
+	targetSpecified = False
+	for arg, val in ech2x.opts:
+		if arg == "--dot-path":
+			# user-specified 'dot' path
+			dotpath = val
+		elif arg == "--target-directory":
+			# user-specified target directory
+			targetSpecified = True
+	# ensure that 'dot' executable exists
+	try:
+		retval = os.spawnl(os.P_WAIT, dotpath, "-V")
+	except Exception, message:
+		retval = -1
+	if retval < 0:
+		sys.stderr.write("ech2doc: unable to execute 'dot -V'. Graphviz 'dot' must be installed to run ech2doc.\n")
+		sys.exit(1)
+	# use current directory as target directory if no target directory
+	# specified by user
+	if not targetSpecified:
+		sys.argv = [ sys.argv[0] ] + ["--target-directory", "."] + sys.argv[1:]
+	# generate per-machine svg and html files
+	machines = apply(ech2x.main, ech2xargs)
+	# generate supplementary top-level and per-package html files
+	documentTitle = "ECharts Machine Documentation"
+	overviewSummary = ""
+	windowTitle = ""
+	documentHeader = ""
+	documentFooter = ""
+	for (arg, val) in ech2x.opts:
+		if arg == "--window-title":
+			windowTitle = val
+		elif arg == "--document-title":
+			documentTitle = val
+		elif arg == "--overview":
+			overviewSummaryFile = file(val, 'r')
+			overviewSummary = overviewSummaryFile.read()
+			overviewSummaryFile.close()
+		elif arg == "--header":
+			documentHeader = val
+		elif arg == "--footer":
+			documentFooter = val
+		elif arg == "--svg-only":
+			# we're done!
+			return
+	if windowTitle == "":
+		windowTitle = documentTitle
+
+	# write style sheet
+	styleBody = '''
+/*
+   docmachine style sheet largely borrowed from joomla rhuk
+   solar flare style sheet (which is also used for echarts.org)
+*/
+html {
+    height: 100%;
+	margin: 0px;
+	padding: 0px;
+	border: none;
+}
+
+body {
+    /* echarts.org style */
+	margin: 4px;
+	height: 100%;
+	border: none;
+	padding: 0px;
+	font-family: Arial, Helvetica, Sans Serif;
+	line-height: 120%;
+	font-size: 11px;
+	color: #333333;
+	background: #ffffff;
+}
+
+.outline {
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  padding: 2px;
+}
+
+#buttons_outer {
+	width: 100%;
+  	margin-bottom: 2px;
+	margin-right: 2px;
+	float: left;
+
+}
+
+#buttons_inner {
+	border: 1px solid #cccccc;
+	height: 21px;
+}
+
+#buttons {
+	float: left;
+	margin: 0px;
+	padding: 0px;
+	width: auto;
+}
+
+ul#mainlevel-nav
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	font-size: 0.8em;
+}
+
+ul#mainlevel-nav li
+{
+	background-image: none;
+	padding-left: 0px;
+	padding-right: 0px;
+	float: left;
+	margin: 0;
+	font-size: 11px;
+	line-height: 21px;
+	white-space: nowrap;
+	border-right: 1px solid #cccccc;
+}
+
+ul#mainlevel-nav li a
+{
+	display: block;
+	padding-left: 15px;
+	padding-right: 15px;
+	text-decoration: none;
+	color: #333333;
+	background: transparent;
+}
+
+#buttons>ul#mainlevel-nav li a { width: auto; }
+
+ul#mainlevel-nav li a:hover
+{
+	color: #fff;
+	background: #c64934;
+}
+
+table.contentpaneopen {
+  width: 100%;
+	padding: 0px;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	margin: 0px;
+}
+
+table.contentpaneopen td {
+   padding-right: 5px;
+}
+
+.contentheading {
+	height: 30px;
+	color: #c64934;
+	font-weight: bold;
+	font-size: 14px;
+	white-space: nowrap;
+}
+
+a:link, a:visited {
+	color: #c64934; text-decoration: none;
+	font-weight: bold;
+}
+
+a:hover {
+	color: #900;	text-decoration: none;
+	font-weight: bold;
+}
+
+.button {
+  color: #c64934;
+  font-family: Arial, Hevlvetica, sans-serif;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  border: 3px double #cccccc;
+  width: auto;
+  background: url(images/button_bg.png) repeat-x;
+  padding: 0px 5px;
+  line-height: 18px !important;
+  line-height: 16px;
+  height: 26px !important;
+  height: 24px;
+  margin: 1px;
+}
+
+/* not from echarts.org */
+
+div.header {
+    overflow: hidden;
+	display: block;
+	height: 25px;
+	line-height: 25px !important;
+	line-height: 22px;
+	margin-bottom: 2px;
+}
+
+div.header span.left {
+	padding-left: 4px;
+	float: left;
+	text-align: left;
+}
+
+div.header span.right {
+    float: right;
+    text-align: right;
+	padding-right: 4px;
+}
+
+div.footer {
+    overflow: hidden;
+	display: block;
+	line-height: 25px !important;
+	line-height: 22px;
+	margin-bottom: 2px;
+	text-align: center;
+}
+
+.summary {
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.machine-svg {
+	margin-top: 5px;
+	height: 100%;
+	width: 100%;
+}
+
+#package_name {
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+'''
+	stylePath = string.joinfields([ ech2x.targetBase ] + [ "docmachine.css" ], os.sep)
+	styleFile = file(stylePath, 'w')
+	styleFile.write(styleBody)
+	styleFile.close()
+	# write top-level index.html file
+	indexBody = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<LINK rel="stylesheet" type="text/css" href="docmachine.css" />
+<LINK rel="shortcut icon" href="images/echarts-favicon.ico" />
+<TITLE>%s</TITLE>
+<script type="text/ecmascript">
+    function relocateMachineFrame(newLocation) {
+	    document.getElementById('machine').src = newLocation + ".html";
+    }
+</script>
+</HEAD>
+
+<BODY>
+<table width="100%%" height="100%%" border="0" cellpadding="0"
+	    cellspacing="0">
+<tr>
+<td width="20%%" height="100%%" class="outline">
+  <iframe src="overview-frame.html" id="packages" name="packages"
+  width="100%%" height="35%%" frameborder="0" marginwidth="0"
+  marginheight="0"></iframe>
+  <iframe src="allclasses-frame.html" id="classes" name="classes"
+  width="100%%" height="65%%" frameborder="0" marginwidth="0"
+  marginheight="0"></iframe>
+</td> 
+<td width="80%%" height="100%%" class="outline">
+  <iframe
+  src="overview-summary.html"
+  id="machine" name="machine" width="100%%" height="100%%"
+  frameborder="0" scrolling="no"></iframe>
+</td>
+</tr>
+<tr>
+<td width="100%%" colspan="2"><div class="footer">
+%s
+</div></td>
+</tr>
+</table>
+
+</BODY>
+</HTML>
+""" % (windowTitle, documentFooter)
+	indexPath = string.joinfields([ ech2x.targetBase ] + [ "index.html" ], os.sep)
+	index = file(indexPath, 'w')
+	index.write(indexBody)
+	index.close()
+	# write top-level allclasses-frame.html file
+	packages = {}
+	allClassesFrameHeader = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>ECharts Machines</TITLE>
+<LINK rel="stylesheet" type="text/css" href="docmachine.css" />
+</HEAD>
+<BODY>
+<H3>All Machines</H3>
+"""
+	allClassesFrameFooter = """
+</BODY>
+</HTML>
+"""
+	machineNames = {}
+	packageSourcePaths = {}
+	for machine in machines:
+		compilationUnit = machine.getCompilationUnit();
+		name = AbstractMachine.getMachineName(compilationUnit)
+		package = AbstractMachine.getPackage(compilationUnit)
+		try:
+			machinePackages = machineNames[ name ]
+		except KeyError:
+			machinePackages = []
+			machineNames[ name ] = machinePackages
+		machinePackages.append(package)
+		packageName = string.joinfields(package, ".")
+		packageSourcePaths[ packageName ] = os.path.dirname(machine.absoluteMachineFilePath)
+		try:
+			packageMachines = packages[ packageName ]
+		except KeyError:
+			packageMachines = {}
+			packages[ packageName ] = packageMachines
+		packageMachines[ name ] = None
+	allClassesFramePath = string.joinfields([ ech2x.targetBase ] + [ "allclasses-frame.html" ], os.sep)
+	allClassesFrameFile = file(allClassesFramePath, "w")
+	allClassesFrameFile.write(allClassesFrameHeader)
+	sortedNames = machineNames.keys()
+	sortedNames.sort()
+	for name in sortedNames:
+		sortedPackages = machineNames[ name ]
+		sortedPackages.sort()
+		for package in sortedPackages:
+			allClassesFrameFile.write('<A HREF="%s" target="machine">%s</A><BR>\n' % \
+								  (string.joinfields(package + [ name + ".html" ], "/"), name))
+	allClassesFrameFile.write(allClassesFrameFooter)
+	allClassesFrameFile.close()
+	# write top-level overview-frame.html, overview-summary.html and
+	# per-package package-frame.html, package-summary.html and
+	# <machine>.html files
+	packageFrameHeader = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>ECharts Package Machines</TITLE>
+<LINK rel="stylesheet" type="text/css" href="%s/docmachine.css" />
+</HEAD>
+<BODY>
+<A HREF="package-summary.html" target="machine">%s</A><BR>
+<H3>Machines</H3>
+"""
+	overviewFrameHeader = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>ECharts Machine Packages</TITLE>
+<LINK rel="stylesheet" type="text/css" href="docmachine.css" />
+</HEAD>
+<BODY>
+<A HREF="allclasses-frame.html" target="classes">All Machines</A>
+<H3>Packages</H3>
+"""
+	overviewSummaryHeader = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>ECharts Machine Packages</TITLE>
+<LINK rel="stylesheet" type="text/css" href="docmachine.css" />
+</HEAD>
+<BODY>
+<table width="100%%"  border="0" cellpadding="0" cellspacing="0">
+<tr><td class="outline">
+<div class="header">
+<span class="left">Overview</span>
+<span class="right">%s</span>
+</div>
+</td></tr>
+</table>
+<H3>%s</H3>
+<div class="summary">
+%s
+</div>
+""" % (documentHeader, documentTitle, overviewSummary)
+	packageSummaryHeader = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>ECharts Package Machines</TITLE>
+<LINK rel="stylesheet" type="text/css" href="%s/docmachine.css" />
+</HEAD>
+<BODY>
+<table width="100%%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td>
+<div id="buttons_outer">
+    <div id="buttons_inner">
+	    <div id="buttons">
+		    <ul id="mainlevel-nav">
+			  <li><a href="%s/overview-summary.html" class="mainlevel-nav">Overview</a></li>
+			</ul>						
+		</div>
+	</div>
+</div></td></tr>
+<tr><td class="outline">
+<div class="header">
+<span class="left">Package</span>
+<span class="right">%s</span>
+</div>
+</td></tr>
+</table>
+<H3>%s</H3>
+<div class="summary">%s</div>
+"""
+	overviewFrameFooter = """
+</BODY>
+</HTML>
+"""
+	packageFrameFooter = """
+</BODY>
+</HTML>
+"""
+	overviewSummaryFooter = """
+</BODY>
+</HTML>
+"""
+	packageSummaryFooter = """
+</BODY>
+</HTML>
+"""
+	overviewFramePath = string.joinfields([ ech2x.targetBase ] + [ "overview-frame.html" ], os.sep)
+	overviewFrameFile = file(overviewFramePath, "w")
+	overviewFrameFile.write(overviewFrameHeader)
+	overviewSummaryPath = string.joinfields([ ech2x.targetBase ] + [ "overview-summary.html" ], os.sep)
+	overviewSummaryFile = file(overviewSummaryPath, "w")
+	overviewSummaryFile.write(overviewSummaryHeader)
+	sortedPackages = packages.keys()
+	sortedPackages.sort()
+	for package in sortedPackages:
+		packagePath = string.joinfields([ ech2x.targetBase ] + string.split(package, "."), os.sep)
+		packageFramePath = packagePath + os.sep + "package-frame.html"
+		packageSummaryPath = packagePath + os.sep + "package-summary.html"
+		overviewFrameFile.write('<A HREF="%s" target="classes">%s</A><BR>\n' % \
+							   (string.joinfields(string.split(package, ".") + [ "package-frame.html" ], "/"), \
+								package))
+		overviewSummaryFile.write('<A HREF="%s">%s</A><BR>\n' % \
+								  (string.joinfields(string.split(package, ".") + [ "package-summary.html" ], "/"), \
+								   package))
+		rootPath = string.joinfields(len(string.split(package, ".")) * [".."], "/")
+		packageFrameFile = file(packageFramePath, 'w')
+		packageFrameFile.write(packageFrameHeader % (rootPath, package))
+		packageSummaryFile = file(packageSummaryPath, 'w')
+		# look for package.html file in source directory and add its
+		# contents to generated package-summary.html file
+		packageSummary = ""
+		userPackageFilePath = packageSourcePaths[ package ] + os.sep + "package.html"
+		if os.path.isfile(userPackageFilePath):
+			userPackageFile = file(userPackageFilePath, 'r')
+			packageSummary = userPackageFile.read()
+			userPackageFile.close()
+		packageSummaryFile.write(packageSummaryHeader % (rootPath, rootPath, documentHeader, package, packageSummary))
+		sortedPackageMachineNames = packages[ package ].keys()
+		sortedPackageMachineNames.sort()
+		for packageMachineName in sortedPackageMachineNames:
+			packageFrameFile.write('<A HREF="%s.html" target="machine">%s</A><BR>\n' % \
+								   (packageMachineName, packageMachineName))
+			packageSummaryFile.write('<A HREF="%s.html">%s</A><BR>\n' % \
+									 (packageMachineName, packageMachineName))
+		packageFrameFile.write(packageFrameFooter)
+		packageFrameFile.close()
+		packageSummaryFile.write(packageSummaryFooter)
+		packageSummaryFile.close()
+	overviewFrameFile.write(overviewFrameFooter)
+	overviewFrameFile.close()
+	overviewSummaryFile.write(overviewSummaryFooter)
+	overviewSummaryFile.close()
+	# create images dir and copy images to it
+	sourceImagesPath = imagesPath
+	targetImagesPath = string.joinfields([ ech2x.targetBase ] + [ "images" ], os.sep)
+	os.mkdir(targetImagesPath)
+	shutil.copy(string.joinfields([ sourceImagesPath ] + [ "button_bg.png" ], os.sep), targetImagesPath)
+	shutil.copy(string.joinfields([ sourceImagesPath ] + [ "echarts-favicon.ico" ], os.sep), targetImagesPath)
+
+main()

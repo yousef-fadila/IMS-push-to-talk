@@ -1,0 +1,257 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import javax.servlet.sip.ar.*;
+import javax.servlet.*;
+import java.util.Properties;
+import javax.servlet.ServletContext;
+
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+import org.echarts.servlet.sip.machines.TransparentFSM;
+
+
+/** Back-to-back User Agent machine to be used with Application Composition framework.
+ *  A subscriber port is associated with the caller when the machine is invoked in
+ *  the originating regsion, and with the callee when the machine is invoked in the
+ *  terminating region.
+ *
+ * Receives INVITE on BoxPort.
+ *
+ * Uses optional RequestModifier object to change Request-URI
+ *   for outgoing INVITE.
+ *
+ * In CONNECTED state, INFO messages are passed transparently between
+ *    caller and callee.
+ *
+ * Similar to the RI/TCK sample B2BUA application (version 1.0.9),
+ * there are two unhandled protocol level race conditions:
+ * 1) CANCEL to callee and 200 OK to INVITE from callee crossed:
+ *      (RFC3261 sec 15)
+ *      Because the container has already sent 487 to caller, the application should
+ *      send ACK then BYE to callee to terminate the callee side.
+ * 2) CANCEL from caller and 200 OK to INVITE to caller crossed:
+ *      (JSR116 sec 7.2.3)
+ *      In the case where container receives CANCEL before application tries to send
+ *      200 OK to INVITE to caller side, the send() will throw IllegalStateException.
+ *      This exception should be caught, and the application sends ACK then BYE
+ *      to callee side to terminate the callee side dialog.
+ *
+ * See TODO items in this file for places where additional handling should be added.
+ */
+
+public machine SubscriberB2buaFSM  {
+<*
+	final static String rcsid = "$Name:  $ $Id: SubscriberB2buaFSM.ech,v 1.6 2009/02/15 23:26:14 cheung Exp $";
+	
+	FeatureBox        box;
+	RequestModifier   reqModifier;
+
+	SipPort    subscriber;
+	SipPort    farparty;
+	SipPort    caller;
+	SipPort    callee;
+
+	SipApplicationRoutingRegion        region;
+	BoxPort    boxPort;
+	SipServletRequest pendingAck;
+
+	private SipServletRequest savedInvite;
+	public SipServletRequest calleeInvite;
+
+	SipServletRequest req;
+	SipPort receiver;
+	SipPort sender;
+
+	SipServletRequest pendingRequest;
+	
+	private final static String SUCCESS_RESPONSE = "SUCCESS_RESPONSE";
+	private final static String FAILURE_RESPONSE = "FAILURE_RESPONSE";
+	final static String RECEIVED_BYE     = "RECEIVED_BYE";
+	
+	private void setSuccessResponse(SuccessResponse r) {
+		callee.setAttribute(SUCCESS_RESPONSE, r);
+	}
+	
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) callee.getAttribute(SUCCESS_RESPONSE);
+	}
+
+	private void setFailureResponse(FinalResponse r) {
+		callee.setAttribute(FAILURE_RESPONSE, r);
+	}
+	
+	public FinalResponse getFailureResponse() {
+		return (FinalResponse) callee.getAttribute(FAILURE_RESPONSE);
+	}
+	
+	private void setReceivedBye(Bye b) {
+		callee.setAttribute(RECEIVED_BYE, b);
+	}
+	
+	public Bye getReceivedBye() {
+		return (Bye) callee.getAttribute(RECEIVED_BYE);
+	}
+	
+*>
+
+	/** Used when this FSM is invoked by a parent FSM.
+	*/
+	public SubscriberB2buaFSM(FeatureBox box, SipPort subscriber, SipPort farparty, RequestModifier reqModifier) {
+			this.box        = box;
+			this.subscriber = subscriber;
+			this.farparty   = farparty;
+			this.reqModifier = reqModifier;
+
+			boxPort = box.getBoxPort();
+	}
+
+	/** Used when this FSM is specified as machineClassName by servlet
+	*/
+	public SubscriberB2buaFSM(FeatureBox box, Properties servletProps, ServletContext context) {
+			this.box         = box;
+			this.subscriber  = box.createSipPort("subscriber");
+			this.farparty    = box.createSipPort("farparty");
+			this.reqModifier = box.getDefaultModifier();
+
+			boxPort = box.getBoxPort();
+	}
+
+	initial state INIT;
+
+	state CHECK_REGION;
+
+	public state SEND_INVITE;
+
+	public state MONITOR_CALLEE;
+	
+	state AWAIT_CALLER_ACK;
+
+	public state CONNECTED : TransparentFSM(caller, callee);
+
+	public state FAILURE;
+
+	state AWAIT_INVITE_RESPONSE;
+
+	state AWAIT_CALLER_RESPONSE;
+	
+	public state END;
+
+	transition INIT - boxPort?Invite / {
+		savedInvite = message;
+		region = message.getRegion();
+	} -> CHECK_REGION;
+
+	transition CHECK_REGION - [ region.getType() == SipApplicationRoutingRegionType.ORIGINATING ] / {
+			caller = subscriber;
+			callee = farparty;
+		} -> SEND_INVITE
+	else [ region.getType() == SipApplicationRoutingRegionType.TERMINATING ] / {
+			caller = farparty;
+			callee = subscriber;
+		} -> SEND_INVITE;
+
+	transition SEND_INVITE - / {
+		// set up bidirectional association between SipPort and SipSession
+		caller.bind(savedInvite);
+		calleeInvite = callee.createInvite(savedInvite, reqModifier);
+		callee!calleeInvite;
+	} -> MONITOR_CALLEE;
+	
+	transition MONITOR_CALLEE - callee?ProvisionalResponse /
+		caller!caller.createResponse(message, caller.getInitialRequest())
+	-> MONITOR_CALLEE;
+
+	// once we receive a Cancel, don't do anything else on this port
+	//
+	transition MONITOR_CALLEE - caller?Cancel / {
+		//
+		// will not get a response to this cancel from callee (JSR116 7.1.7),
+		//   but should get a response (487).
+		// TODO : A race condition may also occur where the callee sent 200 OK in the
+		//  meantime.  We should send a ACK, then BYE.
+		//
+		callee!calleeInvite.createCancel();
+		pendingRequest = calleeInvite;
+	} -> AWAIT_INVITE_RESPONSE;
+
+	transition AWAIT_INVITE_RESPONSE - callee?Response
+			[ SipServletUtils.compareSipServletRequests(pendingRequest, message.getRequest()) ]
+	-> END;
+
+	transition MONITOR_CALLEE - callee?SuccessResponse / {
+		setSuccessResponse(message);
+		
+		// create an Ack to be sent after other Ack is received
+		//
+		pendingAck = message.createAck();
+
+		// send SuccessResponse to caller with same SDP as received response
+		//
+		caller!caller.createResponse(message, caller.getInitialRequest());
+
+		//
+		// TODO : Note that a race condition may occur where the container received
+		// CANCEL from caller in the meantime.  See JSR116 7.2.3.
+		// In this case, this will cause an uncaught IllegalStateException.
+		//
+	} -> AWAIT_CALLER_ACK;
+
+	// end-to-end Ack
+	//
+	transition AWAIT_CALLER_ACK - caller?Ack / callee!pendingAck -> CONNECTED;
+	
+	// callee BYE received before caller ACK --- respond and propagate to caller
+	// Handle this at this level since we are not in a transparent state.
+	//
+	transition AWAIT_CALLER_ACK - callee?Bye / {
+		callee!callee.createResponse(200, message);
+		caller!caller.createRequest("BYE");
+	} -> AWAIT_CALLER_RESPONSE;
+
+	// Error calling callee.
+	// Propagate failure response to caller.  Application will not get an ACK,
+	// so we are done.
+	//
+	transition MONITOR_CALLEE - callee?ErrorResponse / {
+		setFailureResponse(message);
+		caller!caller.createResponse(getFailureResponse().getStatus(), caller.getInitialRequest());
+	} -> FAILURE;
+	
+	// Redirect not supported.
+	// Propagate failure response to caller.  Application will not get an ACK,
+	// so we are done.
+	//
+	transition MONITOR_CALLEE - callee?RedirectResponse / {
+		setFailureResponse(message);
+		caller!caller.createResponse(message.getStatus(), caller.getInitialRequest());
+	} -> FAILURE;
+
+	// A parent FSM can define transitions based on FAILURE state, and can
+	// get access to failureResponse if desired (since it is public).
+	//
+	transition FAILURE --> END;
+
+	transition AWAIT_CALLER_RESPONSE - caller?Response -> END;
+	
+	// Ignore any requests from caller (e.g., an ACK race).
+	// Since we are processing messages from caller in this state (see
+	// transition above), we need to be prepared for any messages
+	// we may receive in order to prevent a MachineException.
+	//
+	transition AWAIT_CALLER_RESPONSE - caller?Request -> AWAIT_CALLER_RESPONSE;
+
+	transition CONNECTED.END - /
+		setReceivedBye(CONNECTED.getReceivedBye());
+	-> END;
+}

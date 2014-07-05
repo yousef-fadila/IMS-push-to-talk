@@ -1,0 +1,95 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2008 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SwitchFSM.ech,v 1.3 2008/04/18 14:32:46 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+
+/** Switches common port to newCall (where common is not yet connected).
+ *
+ * <ol>
+ * <li>Places call to newCall </li>
+ * <li>Upon success response from newCall, propagates to common</li>
+ * </ol>
+ */
+
+public machine SwitchFSM  {
+<*
+	SipPort common, newCall;
+	SipServletRequest commonInvite, newInvite;
+	
+	private final static String SUCCESS_RESPONSE = "SUCCESS_RESPONSE";
+	
+	private void setSuccessResponse(SuccessResponse r) {
+		newCall.setAttribute(SUCCESS_RESPONSE, r);
+	}
+	
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) newCall.getAttribute(SUCCESS_RESPONSE);
+	}
+*>
+
+	public SwitchFSM(SipPort common, SipPort newCall) {
+		this.common  = common;
+		this.newCall = newCall;
+		commonInvite = common.getInitialRequest();
+		newInvite = newCall.getInitialRequest();
+	}
+
+	public initial state PLACE_NEW_CALL : {
+		public initial state INIT;
+		public state WAIT_RESPONSE;
+		public state CONNECTED;
+		public state DISCONNECTED;
+
+		transition INIT - / 
+			newCall ! newInvite
+		-> WAIT_RESPONSE;
+
+		// propagate 1xx
+		//
+		transition WAIT_RESPONSE - newCall ? ProvisionalResponse /
+			common ! common.createResponse(message, commonInvite)
+		-> WAIT_RESPONSE;
+
+		transition WAIT_RESPONSE - newCall ? SuccessResponse / {
+			setSuccessResponse(message);
+			newCall ! message.createAck();
+		} -> CONNECTED;
+
+		/** handle error cases
+		 */
+		transition WAIT_RESPONSE - newCall ? FinalResponse -> DISCONNECTED;
+			
+	};
+
+	state CONNECT_COMMON;
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+	
+	/** newCall is connected
+	 */
+	transition PLACE_NEW_CALL.CONNECTED  - /
+		common ! common.createResponse(getSuccessResponse(), commonInvite)
+	-> CONNECT_COMMON;
+
+	transition CONNECT_COMMON - common ? Ack -> SUCCESS;
+
+	/** newCall did not connect
+	 */
+	transition PLACE_NEW_CALL.DISCONNECTED  --> FAILURE;
+
+}

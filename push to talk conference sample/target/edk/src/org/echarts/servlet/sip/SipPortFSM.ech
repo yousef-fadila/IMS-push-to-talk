@@ -1,0 +1,79 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2008 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SipPortFSM.ech 2115 2012-02-15 17:11:46Z yotommy $;
+
+package org.echarts.servlet.sip;
+
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.utilities.*;
+import javax.servlet.sip.SipServletMessage;
+import javax.servlet.sip.SipServletRequest;
+import javax.servlet.sip.SipServletResponse;
+
+/** FSM to track state of a SipPort. 
+ */
+public machine SipPortFSM  { 
+<*
+	SipPort thisPort;
+	RemotePort remote;
+
+	private Invite inviteMsg;
+*>
+
+	SipPortFSM(SipPort thisPort, RemotePort remote) {
+		this.thisPort = thisPort;
+		this.remote = remote;
+
+		// this section gets executed when FSM is constructed, so
+		// set the initial port state here, in case no messages
+		// are processed on this port, and thus .run() is never called
+		thisPort.setPortState(PortState.START);
+	}
+
+	initial state START;
+
+	state INVITE_DIALOG: InviteDialogFSM(thisPort, remote, inviteMsg);
+
+	state END;
+
+	// Invite received
+	//
+	transition START - thisPort?Invite / {
+		inviteMsg = message;
+	} -> INVITE_DIALOG.INVITE_RECEIVED;
+
+	// Invite sent by port
+	//
+	transition START - remote?Invite / {
+		inviteMsg = message;
+	} -> INVITE_DIALOG.INVITE_SENT;
+	
+	// Handle dialog-terminating mid-call responses.  All this tracking
+	// machine does is update a flag.  Application or FeatureBoxTerminationHandler
+	// will react.  SipPortTeardownFSM is sensitive to the value of this flag.
+	//
+	transition INVITE_DIALOG.CONFIRMED - thisPort ? MidDialogTerminationResponse /
+		thisPort.setTerminated(true)
+	-> INVITE_DIALOG.DEEP_HISTORY;
+
+	// Absorb other messages
+	//
+	transition START - thisPort?Object
+	-> START;
+
+	transition START - remote?Object
+	-> START;
+	
+	// Reaches terminal state
+	//
+	transition INVITE_DIALOG.TERMINAL -
+	-> END;
+}

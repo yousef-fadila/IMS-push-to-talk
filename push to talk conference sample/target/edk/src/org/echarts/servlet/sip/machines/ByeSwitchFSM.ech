@@ -1,0 +1,80 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: ByeSwitchFSM.ech,v 1.9 2008/01/23 14:24:03 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+
+/** Switches common port from oldCall to newCall (where oldCall and newCall are connected).
+ * <ol>
+ * <li>Tears down/releases oldCall</li>
+ * <li>Sends re-INVITE to newCall</li>
+ * <li>Upon success response from newCall, sends re-INVITE to common</li>
+ * </ol>
+ */
+
+public machine ByeSwitchFSM  {
+<*
+	SipPort common;
+	SipPort oldCall;
+	SipPort newCall;
+
+	SipServletRequest newReinvite;
+	SipServletResponse successResponse;
+*>
+
+	public ByeSwitchFSM(SipPort common, SipPort oldCall, SipPort newCall) { <*
+		this.common  = common;
+		this.oldCall = oldCall;
+		this.newCall = newCall;
+
+		SipServletRequest initialRequest = newCall.getInitialRequest();
+
+		newReinvite = newCall.createRequest("INVITE");
+		if( initialRequest.getContentLength() > 0 )
+			newReinvite.setContent(initialRequest.getContent(), initialRequest.getContentType());
+	*> }
+
+	public initial state CALLS : concurrent {
+		state TEARDOWN_OLD_CALL : SipPortTeardownFSM(oldCall);
+		state REINVITE_NEW_CALL : SendReinviteFSM(newCall, newReinvite);
+	};
+
+	state COMMON_REINVITE : SendReinviteFSM(common, successResponse);
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+
+	state WAIT_INVITE_RESPONSE;
+	
+	// oldCall is gone, newCall is re-INVITEd
+	//
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.REINVITE_NEW_CALL.SUCCESS ] - /
+		successResponse = CALLS.REINVITE_NEW_CALL.getSuccessResponse()
+	-> COMMON_REINVITE;
+
+	// have to watch for this explicitly because otherwise messages on common would be queued
+	//
+	transition CALLS - common?Bye -> FAILURE;
+
+	transition COMMON_REINVITE.SUCCESS --> SUCCESS;
+
+	transition COMMON_REINVITE.FAILURE --> FAILURE;
+
+	// oldCall is gone, newCall failed
+	//
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.REINVITE_NEW_CALL.FAILURE ] --> FAILURE;
+}

@@ -1,0 +1,125 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: SwitchToConnectedFSM.ech,v 1.3 2008/01/23 14:24:03 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import java.util.Properties;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.Properties;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.sip.*;
+import javax.servlet.ServletContext;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.utilities.*;
+import org.echarts.servlet.sip.machines.*;
+
+/** Starting with port1 and port2 which are both already connected to different parties
+ * this fragment connects these two ports.
+ * <p>
+ * The behavior of this fragment is:
+ * <ul>
+ * <li>Sends re-INVITE on port2 with no SDP to solicit an SDP offer.</li>
+ * <li>Upon receipt of 200 OK with SDP offer from port2, sends re-INVITE on port1.</li>
+ * <li>Upon receipt of 200 OK with SDP answer from port1, sends ACK with SDP on port2. (Also sends ACK on port1)</li>
+ * </ul>
+ */
+public machine SwitchToConnectedFSM  {
+<*
+	private SipPort port1;
+	private SipPort port2;
+	private URI fromUri;
+	private URI requestUri;
+	private Properties headers;
+	private SipServletResponse responseToMatch;
+	private Object sdp;
+
+*>
+    public SwitchToConnectedFSM(SipPort port1, SipPort port2) {
+		this.port1 = port1;
+		this.port2 = port2;
+    }
+
+	public initial state CALLS : concurrent {
+		public state CALL2 : {
+			public initial state REINVITE : SendReinviteFSM(port2, (String) null);
+
+			state WAIT_FOR_CALL1_REINVITE;
+
+			state CONNECTED;
+		}
+
+		public state CALL1 : {
+			/** Start out idle, wait for parent to invoke transition.
+			 */
+			initial state IDLE;
+
+			/** Send re-INVITE to port1 based on port2 response.
+			 */
+			public state REINVITE : SendReinviteFSM(port1, responseToMatch);
+
+			/** Successful re-INVITE completed
+			 */
+			transition REINVITE.SUCCESS - / <*
+				sdp = REINVITE.getSuccessResponse().getContent();
+			*> -> REINVITED;
+
+			/** Successful re-INVITE completed
+			 */
+			// nonterminal is required to prevent DEEP_HISTORY transition from recreating the
+			//  machine and going to its initial state (since REINVITED would be terminal
+			//  otherwise).
+			//
+			nonterminal state REINVITED;
+
+			// TODO : handle REINVITE.FAILURE --- what is the desired behavior?
+		};
+
+		/** Successful call to port2, so re-INVITE port1 if IDLE
+         * (Don't need to re-INVITE if already happened due to early media)
+         * This transition overrides the one defined above.
+         *
+         * N.B. We do not transition to CALLEE.DEEP_HISTORY because that would
+         * cause machine to be re-entered at initial state (because this
+         * transition destroys machine in terminal state).
+         */
+        transition [ CALL1.IDLE, CALL2.REINVITE.SEND_ACK ] - /
+            responseToMatch = CALL2.REINVITE.getSuccessResponse(); // save before machine goes out of scope
+        -> [ CALL1.REINVITE, CALL2.WAIT_FOR_CALL1_REINVITE ];
+
+		transition [ CALL1.REINVITED, CALL2.WAIT_FOR_CALL1_REINVITE ] - / {
+		<*
+			SipServletRequest ack = responseToMatch.createAck();
+			ack.setContent(sdp, "application/sdp");
+			port2.output(ack, this);
+		*>
+		} -> [ CALL1.DEEP_HISTORY, CALL2.CONNECTED];
+
+		/** Prevent message queueing so that auto-termination will trigger
+		 * if port1 sends BYE.  All other messages are absorbed.
+		 */
+		transition CALL1 - port1 ? Object -> CALL1.DEEP_HISTORY;
+	};
+
+	public state SUCCESS;
+
+	transition [ CALLS.CALL1.REINVITED, CALLS.CALL2.CONNECTED ] -
+    -> SUCCESS;
+
+	public state FAILURE;
+
+	transition CALLS.CALL2.REINVITE.FAILURE --> FAILURE;
+}

@@ -1,0 +1,281 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006 AT&T Corp.                       *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+package org.echarts.servlet.sip.machines; 
+
+import java.util.Properties;
+import javax.servlet.ServletContext;
+import javax.servlet.sip.*;
+import javax.servlet.sip.ar.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+import org.echarts.servlet.sip.machines.utilities.*;
+import org.echarts.servlet.sip.utilities.MessageModifier;
+import org.echarts.servlet.sip.utilities.SipServletUtils;
+import java.io.*;
+import javax.servlet.ServletContext;
+import java.util.*;
+
+public machine ReferFSM {
+<*
+	private static final String REFER_HEADER = "Refer-To";
+	private static final String METHOD_PARAM_STR = "method=";
+	private static final String SUBSCRIPTION_STATE_HEADER = "Subscription-State" ;
+	private static final String EVENT_HEADER = "Event";
+	private static final String REFER_HEADER_VALUE = "refer";
+	private static final int REFER_DENY_ERROR_CODE = 403;
+
+	SipPort p;
+	BoxPort boxPort;
+	SipServletRequest referMessage;
+	SipURI from;
+
+	private ReferPolicy referPolicy;	
+
+	private String referredPartyMethod, referredParty;
+
+	private boolean initialNotifyCompleted; 
+
+	private enum NOTIFY_STATE {
+		TRYING, IN_PROGRESS, SUCCESS	
+	} 
+
+	private void prepareNotifyMessage(SipServletRequest req, final NOTIFY_STATE state){
+		req.addHeader(EVENT_HEADER,REFER_HEADER_VALUE);
+		String subcriptionStateExpiration = "";
+		try{
+			switch(state)
+			{
+				case TRYING: 	
+					subcriptionStateExpiration = "active;expires=" + referPolicy.getTryingExpirationInterval();
+					req.setContent("SIP/2.0 100 Trying","message/sipfrag");
+					break;
+				case IN_PROGRESS:
+					subcriptionStateExpiration = "active;expires=" + referPolicy.getInProgressExpirationInterval();
+					req.setContent("SIP/2.0 180 Ringing","message/sipfrag");
+					break;
+				case SUCCESS:
+					subcriptionStateExpiration = "terminated;reason=noresource";
+					req.setContent("SIP/2.0 200 OK","message/sipfrag");
+					break;
+				default:
+					putEvent(new WarnEvent("Unknown Notify State"));
+			}
+			req.addHeader(SUBSCRIPTION_STATE_HEADER,subcriptionStateExpiration);
+		}catch(UnsupportedEncodingException e){
+			e.printStackTrace();
+		}catch(Exception e){
+                        e.printStackTrace();
+                }
+	}
+
+	public MessageModifier createNotifyMessageModifer(final NOTIFY_STATE state){
+		MessageModifier msgModifier = new MessageModifier(){
+			@Override
+			public void modify(SipServletRequest req) {
+				prepareNotifyMessage(req, state);
+			}
+		};
+		return msgModifier; 
+	}
+
+	private boolean acceptRefer(){  
+		return referPolicy.getAcceptReferPolicy();
+	}
+
+	public void setReferMessage(SipServletRequest msg){
+		this.referMessage = msg;
+		setReferredParty();
+	}
+
+	private boolean ifReferMsgNotNull(){
+		return (referMessage == null)?false:true;
+	}
+
+	private void setReferredParty(){
+
+		if(referMessage == null)
+			return ;
+
+		String reference = referMessage.getHeader(REFER_HEADER);
+		if(reference == null)
+			return ;
+
+		int beg_idx, end_idx;
+		if( (beg_idx = reference.indexOf("<")) == -1 )
+			beg_idx = 0;
+		if( (end_idx = reference.indexOf(">")) == -1 )
+			end_idx = reference.length();
+
+		reference = reference.substring(beg_idx+1, end_idx);         
+		String[] uri_tokens = reference.split(";");
+
+		for(int i=0; i<uri_tokens.length; i++ ){
+			if(i == 0 )
+				referredParty = uri_tokens[i];
+
+			if(uri_tokens[i].indexOf(METHOD_PARAM_STR) > -1 )
+				referredPartyMethod = uri_tokens[i].substring(METHOD_PARAM_STR.length(), uri_tokens[i].length());
+		}
+	}
+
+	public String getReferredParty(){
+		return referredParty;
+	}
+
+	public String getReferredPartyMethod(){
+		return referredPartyMethod;
+	}
+
+	private boolean ifInitialNotifyComplete(){
+		return initialNotifyCompleted;
+	} 
+
+	private void setInitialNotificationComplete(){
+		initialNotifyCompleted = true;
+	}
+
+	public SipPort getReferSIPPort(){
+		return p;
+	}
+
+	private boolean ifBoxPortNotNull(){
+		return (boxPort == null)?false:true;		
+	}
+
+*>
+
+	public ReferFSM(SipPort sp) {
+		p = sp;
+		referMessage = null;
+		referredPartyMethod = null;
+		initialNotifyCompleted = false;
+		referPolicy = new ReferPolicy();
+	}
+
+	public ReferFSM(SipPort sp, ReferPolicy rPolicy){
+		p = sp;
+		referMessage = null;
+		referredPartyMethod = null;
+		initialNotifyCompleted = false;
+		referPolicy = rPolicy;	
+	}
+
+	public ReferFSM(SipPort sp, SipServletRequest referMsg) {
+		p = sp;
+		referMessage = referMsg;
+		referredPartyMethod = null;
+		initialNotifyCompleted = false;
+		referPolicy = new ReferPolicy();
+	}
+
+	public ReferFSM(SipPort sp, SipServletRequest referMsg, ReferPolicy rPolicy) {
+		p = sp;
+		referMessage = referMsg;
+		referredPartyMethod = null;
+		initialNotifyCompleted = false;
+		referPolicy = rPolicy;
+	}
+
+	public ReferFSM(FeatureBox box, BoxPort bPort){
+		boxPort = bPort;
+		p = box.createSipPort("referee");
+		referPolicy = new ReferPolicy();
+	}
+
+	public ReferFSM(FeatureBox box, BoxPort bPort, ReferPolicy rPolicy){
+		boxPort = bPort;
+		referPolicy = rPolicy;
+		p = box.createSipPort("referee");
+	}
+
+	initial state IDLE;
+
+	/** If boxPort not initialized by parent, the machine quits with a Null Port Exception since machine fragment runs as a concurrent machine.  
+	*/	
+	transition IDLE - [ ifBoxPortNotNull() ] -> GET_BOXPORT_MESSAGE ; 
+
+	state GET_BOXPORT_MESSAGE;
+
+	/** Refer machine fragment listens to Refer message on boxPort
+	*/	
+	transition GET_BOXPORT_MESSAGE - boxPort ? Refer / {
+		setReferMessage(message);
+		p.bind(message);
+	} -> SEND_REFER_RESPONSE; 
+	
+
+	/** Refer machine fragment processes incoming REFER message
+	*/
+	transition IDLE - p ? Refer / {
+		setReferMessage(message);
+	} -> SEND_REFER_RESPONSE;
+
+	transition IDLE - [ ifReferMsgNotNull() ] -> SEND_REFER_RESPONSE;
+
+	state SEND_REFER_RESPONSE;
+
+	/** Send Refer response based on a configured policy
+	*/
+	transition SEND_REFER_RESPONSE - [ acceptRefer()  ] / {
+		p!p.createResponse(202,referMessage);
+		p ! p.createRequest("NOTIFY", createNotifyMessageModifer(NOTIFY_STATE.TRYING)); 
+	} -> NOTIFY_BEGIN_SUBSCRIPTION
+	else
+	-> DENY_REFER;
+
+	state DENY_REFER;
+
+	transition DENY_REFER - / {
+		p!p.createResponse(REFER_DENY_ERROR_CODE, referMessage);     
+	} -> REJECTED;
+
+	public state NOTIFY_BEGIN_SUBSCRIPTION;
+
+	/** Send Initial Notify to signal begin of subscription
+	*/
+	transition NOTIFY_BEGIN_SUBSCRIPTION - p ? OtherSuccessResponse / {
+		setInitialNotificationComplete();	
+	} -> INITIAL_NOTIFY_COMPLETE;
+
+	public nonterminal state INITIAL_NOTIFY_COMPLETE;
+
+	public state SUBSCRIPTION_BEGUN;
+
+	/** Upon receiving a signal from parent app to update notification, prepare the update NOTIFY request and send it 
+	*/
+	transition SUBSCRIPTION_BEGUN - [ ifInitialNotifyComplete()  ] / {
+		p ! p.createRequest("NOTIFY", createNotifyMessageModifer(NOTIFY_STATE.IN_PROGRESS));
+	} -> SENT_UPDATE_NOTIFY;
+
+	state SENT_UPDATE_NOTIFY;
+
+	transition SENT_UPDATE_NOTIFY - p ? OtherSuccessResponse -> UPDATE_NOTIFY_COMPLETE;
+
+	public nonterminal state UPDATE_NOTIFY_COMPLETE;
+
+	public state NOTIFY_END_SUBSCRIPTION;
+
+	/** Upon receiving a signal from parent app to terminate subscription, prepare the final NOTIFY request and send it
+	*/
+	transition NOTIFY_END_SUBSCRIPTION - [ ifInitialNotifyComplete()  ] / {
+		p ! p.createRequest("NOTIFY", createNotifyMessageModifer(NOTIFY_STATE.SUCCESS));
+	} -> SENT_FINAL_NOTIFY;
+
+	state SENT_FINAL_NOTIFY;
+
+	transition SENT_FINAL_NOTIFY - p ? SuccessResponse -> SUCCESS;
+
+	public state SUCCESS;
+
+	public state REJECTED;
+}
+

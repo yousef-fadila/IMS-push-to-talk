@@ -1,0 +1,141 @@
+/***********************************************************************
+*                                                                      *
+*               This software is part of the ECharts package           *
+*                  Copyright (c) 2006-2009 AT&T Corp.                  *
+*                      and is licensed under the                       *
+*                  Common Public License, Version 1.0                  *
+*                            by AT&T Corp.                             *
+*                                                                      *
+***********************************************************************/
+
+// $Name:  $ $Id: ByeSwitchNewFSM.ech,v 1.5 2008/04/18 14:32:46 tsmith Exp $;
+
+package org.echarts.servlet.sip.machines;
+
+import javax.servlet.sip.*;
+import org.echarts.servlet.sip.*;
+import org.echarts.servlet.sip.messages.*;
+import org.echarts.servlet.sip.machines.*;
+
+/** Switches common port from oldCall to newCall (where oldCall is connected, newCall is not).
+ *
+ * <ol>
+ * <li>Tears down/releases oldCall</li>
+ * <li>Places call to newCall (using newInvite)</li>
+ * <li>Upon success response from newCall, sends re-INVITE to common</li>
+ * </ol>
+ */
+
+public machine ByeSwitchNewFSM  {
+<*
+	SipPort common;
+	SipPort oldCall;
+	SipPort newCall;
+
+	SipServletRequest newInvite;
+	
+	private final static String SESSION_PROGRESS_RESPONSE = "SESSION_PROGRESS_RESPONSE";
+	private final static String SUCCESS_RESPONSE = "SUCCESS_RESPONSE";
+	private final static String FAILURE_RESPONSE = "FAILURE_RESPONSE";
+	
+	private void setSessionProgressResponse(ProvisionalResponse183 r) {
+		newCall.setAttribute(SESSION_PROGRESS_RESPONSE, r);
+	}
+	
+	public ProvisionalResponse183 getSessionProgressResponse() {
+		return (ProvisionalResponse183) newCall.getAttribute(SESSION_PROGRESS_RESPONSE);
+	}
+
+	private void setSuccessResponse(SuccessResponse r) {
+		newCall.setAttribute(SUCCESS_RESPONSE, r);
+	}
+	
+	public SuccessResponse getSuccessResponse() {
+		return (SuccessResponse) newCall.getAttribute(SUCCESS_RESPONSE);
+	}
+
+	private void setFailureResponse(FinalResponse r) {
+		newCall.setAttribute(FAILURE_RESPONSE, r);
+	}
+	
+	public FinalResponse getFailureResponse() {
+		return (FinalResponse) newCall.getAttribute(FAILURE_RESPONSE);
+	}
+	
+	
+*>
+
+	public ByeSwitchNewFSM(SipPort common, SipPort oldCall, SipPort newCall) {
+		this.common  = common;
+		this.oldCall = oldCall;
+		this.newCall = newCall;
+
+		newInvite = newCall.getInitialRequest();
+	}
+
+	public initial state CALLS : concurrent {
+		state TEARDOWN_OLD_CALL : SipPortTeardownFSM(oldCall);
+		public state PLACE_NEW_CALL : {
+			public initial state INIT;
+			public state WAIT_RESPONSE;
+			public state COMMON_REINVITE : SendReinviteFSM(common, getSessionProgressResponse());
+			public state CONNECTED;
+			public state FAILURE;
+
+			transition INIT - / 
+				newCall!newInvite
+			-> WAIT_RESPONSE;
+
+			// 183 => re-INVITE common
+			//
+			transition WAIT_RESPONSE - newCall?ProvisionalResponse183 /
+				setSessionProgressResponse(message);
+			-> COMMON_REINVITE;
+
+			// absorb all provisional responses except 183
+			//
+			transition WAIT_RESPONSE - newCall?ProvisionalResponse 
+			-> WAIT_RESPONSE;
+
+			transition COMMON_REINVITE.SUCCESS --> WAIT_RESPONSE;
+
+			// TODO : COMMON_REINVITE.FAILURE --> ...
+
+			transition WAIT_RESPONSE - newCall?SuccessResponse / {
+				setSuccessResponse(message);
+				newCall!message.createAck();
+			} -> CONNECTED;
+
+			// handle error response from newCall
+			transition WAIT_RESPONSE - newCall?FinalResponse /
+				setFailureResponse(message);
+			-> FAILURE;
+		};
+	};
+
+	state COMMON_REINVITE : SendReinviteFSM(common, getSuccessResponse());
+	
+	public state SUCCESS;
+
+	public state FAILURE;
+
+	state WAIT_INVITE_RESPONSE;
+	
+	// oldCall is gone, newCall is connected
+	//
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.PLACE_NEW_CALL.CONNECTED ] --> COMMON_REINVITE;
+
+	// have to watch for this explicitly because otherwise messages on common would be queued
+	//
+	transition CALLS - common?Bye -> FAILURE;
+
+	transition COMMON_REINVITE.SUCCESS --> SUCCESS;
+
+	transition COMMON_REINVITE.FAILURE --> FAILURE;
+
+	// oldCall is gone, newCall failed
+	//
+	transition [ CALLS.TEARDOWN_OLD_CALL.TERMINAL, CALLS.PLACE_NEW_CALL.FAILURE ] --> FAILURE;
+
+    transition COMMON_REINVITE - newCall ? ProvisionalResponse -> COMMON_REINVITE.DEEP_HISTORY;
+}

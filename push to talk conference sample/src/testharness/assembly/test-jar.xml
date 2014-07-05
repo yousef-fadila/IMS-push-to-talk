@@ -1,0 +1,32 @@
+<assembly>
+  <!-- 
+    Assembly descriptor for a jar that includes the SUT, test classes, and
+    test harness.
+	-->
+
+  <id>test</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+
+
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+
+    <!-- 
+      Copy all classes generated from src/test and src/testharness. This will
+      also pick up src/test, which we don't need but which will hopefully
+      be harmless.
+     -->
+    <fileSet>
+      <directory>target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>target/test-classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+
+</assembly>
+
